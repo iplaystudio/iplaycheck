@@ -1,0 +1,20 @@
+{
+  "name": "工作室打卡",
+  "short_name": "打卡",
+  "description": "工作室打卡",
+  "theme_color": "#007aff",
+  "background_color": "#f2f2f7",
+  "display": "standalone",
+  "orientation": "portrait",
+  "scope": "/",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "/icon.jpg",
+      "sizes": "any",
+      "type": "image/jpg"
+    }
+  ],
+  "categories": ["productivity", "business"],
+  "prefer_related_applications": false
+}
