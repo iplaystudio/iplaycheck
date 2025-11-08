@@ -16,7 +16,8 @@ export const useUserStore = defineStore('user', {
     isAuthenticated: false,
     isAdmin: false,
     loading: false,
-    error: null
+    error: null,
+    networkStatus: 'checking' // 'online', 'offline', 'checking'
   }),
 
   getters: {
@@ -29,6 +30,9 @@ export const useUserStore = defineStore('user', {
   actions: {
     // 初始化认证监听
     initAuth() {
+      // 初始化网络状态检测
+      this.checkNetworkStatus();
+      
       return new Promise((resolve) => {
         onAuthStateChanged(auth, async (user) => {
           if (user) {
@@ -45,6 +49,22 @@ export const useUserStore = defineStore('user', {
           }
         });
       });
+    },
+
+    // 检查网络状态
+    async checkNetworkStatus() {
+      try {
+        // 尝试连接Firebase服务来检测网络
+        const testDoc = await getDoc(doc(db, '_network_test_', 'test'));
+        this.networkStatus = 'online';
+      } catch (error) {
+        console.warn('Network check failed:', error.code);
+        if (error.code === 'unavailable' || error.code === 'failed-precondition') {
+          this.networkStatus = 'offline';
+        } else {
+          this.networkStatus = 'online'; // 其他错误可能是权限问题，不是网络问题
+        }
+      }
     },
 
     // 加载用户资料
@@ -75,6 +95,13 @@ export const useUserStore = defineStore('user', {
     async login(email, password) {
       this.loading = true;
       this.error = null;
+
+      // 检查网络状态
+      if (this.networkStatus === 'offline') {
+        this.error = '网络连接不可用，请检查网络连接或使用VPN';
+        this.loading = false;
+        throw new Error('Network offline');
+      }
 
       try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -107,6 +134,13 @@ export const useUserStore = defineStore('user', {
     async register(email, password, name) {
       this.loading = true;
       this.error = null;
+
+      // 检查网络状态
+      if (this.networkStatus === 'offline') {
+        this.error = '网络连接不可用，请检查网络连接或使用VPN';
+        this.loading = false;
+        throw new Error('Network offline');
+      }
 
       try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -182,11 +216,13 @@ export const useUserStore = defineStore('user', {
         'auth/wrong-password': '密码错误',
         'auth/email-already-in-use': '该邮箱已被注册',
         'auth/weak-password': '密码强度太弱',
-        'auth/network-request-failed': '网络连接失败',
+        'auth/network-request-failed': '网络连接失败，请检查网络连接或使用VPN',
+        'auth/timeout': '网络连接超时，请检查网络连接或使用VPN',
+        'auth/internal-error': '服务器内部错误，请稍后重试或使用VPN',
         'auth/too-many-requests': '请求次数过多,请稍后再试'
       };
 
-      return errorMessages[errorCode] || '认证错误,请重试';
+      return errorMessages[errorCode] || '认证错误,请重试。如问题持续，请尝试使用VPN';
     }
   }
 });

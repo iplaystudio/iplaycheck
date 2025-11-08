@@ -58,6 +58,15 @@
             {{ error }}
           </div>
 
+          <!-- 网络提示 -->
+          <div class="network-notice">
+            <svg viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+              <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>如遇到网络连接问题，请尝试使用VPN访问Firebase服务</span>
+          </div>
+
           <button type="submit" class="submit-btn" :disabled="loading">
             <span v-if="loading" class="spinner"></span>
             {{ loading ? '登录中...' : '登录' }}
@@ -99,6 +108,15 @@
 
           <div v-if="error" class="error-alert">
             {{ error }}
+          </div>
+
+          <!-- 网络提示 -->
+          <div class="network-notice">
+            <svg viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+              <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>如遇到网络连接问题，请尝试使用VPN访问Firebase服务</span>
           </div>
 
           <button type="submit" class="submit-btn" :disabled="loading">
@@ -482,6 +500,26 @@ export default {
   font-size: 12px;
   color: var(--label-tertiary);
   margin: 0;
+}
+
+/* 网络提示 */
+.network-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--systemBlue-onDark);
+  border-radius: var(--global-border-radius-medium);
+  font-size: 13px;
+  color: var(--systemBlue);
+  margin-bottom: 16px;
+  border: 1px solid var(--systemBlue);
+}
+
+.network-notice svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
 }
 
 /* 响应式 */
