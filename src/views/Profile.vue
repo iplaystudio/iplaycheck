@@ -1,7 +1,7 @@
 <template>
   <div class="profile">
     <!-- 个人信息卡片 -->
-    <AppleCard variant="secondary" class="profile-card">
+    <AppleCard variant="elevated" class="profile-card">
       <div class="profile-header">
         <div class="avatar">
           <svg viewBox="0 0 24 24" fill="none">

@@ -31,22 +31,40 @@ const install = async () => {
     console.log(`用户响应安装提示: ${outcome}`);
     deferredPrompt.value = null;
     showPrompt.value = false;
+  } else if (import.meta.env.DEV) {
+    // 在开发环境中显示提示信息
+    alert('在开发环境中，无法实际安装PWA应用。但在生产环境中，用户会看到浏览器的安装提示。');
+    showPrompt.value = false;
   }
 };
 
 const dismiss = () => {
   showPrompt.value = false;
-  localStorage.setItem('pwa-install-dismissed', 'true');
+  if (!import.meta.env.DEV) {
+    localStorage.setItem('pwa-install-dismissed', 'true');
+  }
 };
 
 const showInstallPrompt = () => {
   const dismissed = localStorage.getItem('pwa-install-dismissed');
-  if (!dismissed && deferredPrompt.value) {
-    showPrompt.value = true;
+  if (!dismissed) {
+    // 在开发环境中，即使没有deferredPrompt也显示安装提示
+    if (import.meta.env.DEV) {
+      showPrompt.value = true;
+    } else if (deferredPrompt.value) {
+      showPrompt.value = true;
+    }
   }
 };
 
 onMounted(() => {
+  // 在开发环境中立即显示安装提示
+  if (import.meta.env.DEV) {
+    setTimeout(() => {
+      showInstallPrompt();
+    }, 2000); // 延迟2秒显示，给页面加载时间
+  }
+
   // 监听 beforeinstallprompt 事件
   const handleBeforeInstallPrompt = (e) => {
     e.preventDefault();

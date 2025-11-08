@@ -95,7 +95,6 @@
     <AppleCard class="dashboard-content">
       <RecordsList v-if="activeTab === 'records'" />
       <UserManagement v-if="activeTab === 'users'" />
-      <LocationManagement v-if="activeTab === 'locations'" />
       <DataAnalytics v-if="activeTab === 'analytics'" />
     </AppleCard>
 
@@ -172,7 +171,6 @@ import AppleLoading from '@/components/shared/AppleLoading.vue';
 import AppleToast from '@/components/shared/AppleToast.vue';
 import RecordsList from './RecordsList.vue';
 import UserManagement from './UserManagement.vue';
-import LocationManagement from './LocationManagement.vue';
 import DataAnalytics from './DataAnalytics.vue';
 
 export default {
@@ -185,7 +183,6 @@ export default {
     AppleToast,
     RecordsList,
     UserManagement,
-    LocationManagement,
     DataAnalytics
   },
 
@@ -201,7 +198,6 @@ export default {
     const tabs = [
       { id: 'records', label: '打卡记录' },
       { id: 'users', label: '用户管理' },
-      { id: 'locations', label: '位置管理' },
       { id: 'analytics', label: '数据分析' }
     ];
 

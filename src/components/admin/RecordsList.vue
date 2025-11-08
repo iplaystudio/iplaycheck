@@ -32,7 +32,6 @@
             <th>用户</th>
             <th>类型</th>
             <th>照片</th>
-            <th>位置</th>
             <th>同步状态</th>
             <th>操作</th>
           </tr>
@@ -49,11 +48,6 @@
             <td>
               <button @click="viewPhoto(record)" class="btn-icon">
                 📷
-              </button>
-            </td>
-            <td>
-              <button @click="viewLocation(record)" class="btn-icon">
-                📍
               </button>
             </td>
             <td>
@@ -81,34 +75,6 @@
           </div>
           <div class="modal-body">
             <img :src="selectedRecord?.photo" alt="打卡照片" class="photo-view" />
-          </div>
-        </div>
-      </div>
-    </Teleport>
-
-    <!-- 位置查看对话框 -->
-    <Teleport to="body">
-      <div v-if="showLocationModal" class="modal-overlay" @click="showLocationModal = false">
-        <div class="modal-card" @click.stop>
-          <div class="modal-header">
-            <h3>打卡位置</h3>
-            <button class="close-button" @click="showLocationModal = false">×</button>
-          </div>
-          <div class="modal-body">
-            <div class="location-info">
-              <div class="info-row">
-                <span class="label">坐标:</span>
-                <span class="value">{{ selectedRecord?.location?.latitude }}, {{ selectedRecord?.location?.longitude }}</span>
-              </div>
-              <div class="info-row">
-                <span class="label">精度:</span>
-                <span class="value">{{ selectedRecord?.location?.accuracy }} 米</span>
-              </div>
-              <div class="info-row" v-if="selectedRecord?.location?.address">
-                <span class="label">地址:</span>
-                <span class="value">{{ selectedRecord?.location?.address }}</span>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -149,26 +115,6 @@
                       {{ selectedRecord?.synced ? '已同步' : '待同步' }}
                     </span>
                   </span>
-                </div>
-              </div>
-            </div>
-
-            <div class="detail-section" v-if="selectedRecord?.location">
-              <h4>位置信息</h4>
-              <div class="detail-grid">
-                <div class="detail-item full-width">
-                  <span class="label">坐标</span>
-                  <span class="value coord">
-                    {{ selectedRecord.location.latitude?.toFixed(6) }}, {{ selectedRecord.location.longitude?.toFixed(6) }}
-                  </span>
-                </div>
-                <div class="detail-item">
-                  <span class="label">定位精度</span>
-                  <span class="value">{{ selectedRecord.location.accuracy }} 米</span>
-                </div>
-                <div class="detail-item full-width" v-if="selectedRecord.location.address">
-                  <span class="label">地址</span>
-                  <span class="value">{{ selectedRecord.location.address }}</span>
                 </div>
               </div>
             </div>
@@ -215,7 +161,6 @@ export default {
     const filterType = ref('');
     const filterDate = ref('');
     const showPhotoModal = ref(false);
-    const showLocationModal = ref(false);
     const showDetailsModal = ref(false);
     const selectedRecord = ref(null);
 
@@ -292,11 +237,6 @@ export default {
       showPhotoModal.value = true;
     };
 
-    const viewLocation = (record) => {
-      selectedRecord.value = record;
-      showLocationModal.value = true;
-    };
-
     const viewDetails = (record) => {
       selectedRecord.value = record;
       showDetailsModal.value = true;
@@ -314,14 +254,12 @@ export default {
       filterType,
       filterDate,
       showPhotoModal,
-      showLocationModal,
       showDetailsModal,
       selectedRecord,
       getUserName,
       getTypeName,
       formatDateTime,
       viewPhoto,
-      viewLocation,
       viewDetails
     };
   }

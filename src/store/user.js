@@ -61,8 +61,7 @@ export const useUserStore = defineStore('user', {
           this.profile = {
             name: this.user.email,
             role: 'user',
-            createdAt: new Date().toISOString(),
-            allowedLocations: []
+            createdAt: new Date().toISOString()
           };
           await setDoc(docRef, this.profile);
         }
@@ -118,8 +117,7 @@ export const useUserStore = defineStore('user', {
           name: name || email,
           email,
           role: 'user',
-          createdAt: new Date().toISOString(),
-          allowedLocations: []
+          createdAt: new Date().toISOString()
         });
 
         // 等待认证状态同步

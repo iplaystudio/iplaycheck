@@ -10,7 +10,6 @@ import {
   getDBStats
 } from '@/services/indexedDB';
 import CameraService from '@/services/camera';
-import GeolocationService from '@/services/geolocation';
 import syncService from '@/services/sync';
 
 export const usePunchStore = defineStore('punch', {
@@ -232,29 +231,6 @@ export const usePunchStore = defineStore('punch', {
         // 验证打卡类型
         this.validatePunchType(type);
 
-        // 获取位置信息
-        const geolocation = new GeolocationService();
-        const position = await geolocation.getCurrentPosition();
-
-        // 验证位置(如果有配置)
-        if (options.allowedLocations && options.allowedLocations.length > 0) {
-          const validation = geolocation.validateLocation(
-            position,
-            options.allowedLocations,
-            options.locationRadius || 100
-          );
-
-          if (!validation.valid) {
-            throw new Error('您不在允许的打卡范围内');
-          }
-        }
-
-        // 获取地址信息
-        const address = await geolocation.reverseGeocode(
-          position.latitude,
-          position.longitude
-        );
-
         // 拍照(如果需要)
         let photo = null;
         if (options.requirePhoto !== false) {
@@ -273,12 +249,6 @@ export const usePunchStore = defineStore('punch', {
           timestamp: new Date().toISOString(),
           type,
           photo,
-          location: {
-            latitude: position.latitude,
-            longitude: position.longitude,
-            accuracy: position.accuracy,
-            address: address.address
-          },
           autoTriggered: options.autoTriggered || false,
           synced: false,
           createdAt: new Date().toISOString()

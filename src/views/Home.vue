@@ -48,7 +48,7 @@
       <AppleCard class="info-card">
         <h3>使用提示</h3>
         <ul class="guide-list">
-          <li>每天上班前打卡记录时间和位置</li>
+          <li>每天上班前打卡记录时间</li>
           <li>支持离线打卡自动同步</li>
           <li>打卡时需拍照确认</li>
           <li>可记录统计工时</li>

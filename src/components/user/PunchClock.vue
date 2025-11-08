@@ -104,27 +104,6 @@
       </div>
     </AppleCard>
 
-    <!-- 位置验证 Modal -->
-    <Teleport to="body">
-      <div class="modal-overlay" v-if="showLocation" @click="cancelPunch">
-        <div class="modal-card" @click.stop>
-          <div class="modal-header">
-            <h3>验证位置</h3>
-            <button class="close-button" @click="cancelPunch">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M15 5L5 15M5 5l10 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-              </svg>
-            </button>
-          </div>
-          <LocationValidator 
-            :allowed-locations="locationConfig.allowedLocations"
-            :radius-meters="locationConfig.radiusMeters"
-            @location-validated="handleLocationValidated" 
-          />
-        </div>
-      </div>
-    </Teleport>
-
     <!-- 拍照 Modal -->
     <Teleport to="body">
       <div class="modal-overlay" v-if="showCamera" @click="cancelPunch">
@@ -158,127 +137,18 @@ import { doc, getDoc } from 'firebase/firestore'
 import { db } from '@/services/firebase'
 import { usePunchStore } from '@/store/punch'
 import { useUserStore } from '@/store/user'
-import LocationValidator from './LocationValidator.vue'
 import CameraCapture from './CameraCapture.vue'
 import AppleButton from '@/components/shared/AppleButton.vue'
 import AppleCard from '@/components/shared/AppleCard.vue'
 import AppleLoading from '@/components/shared/AppleLoading.vue'
 import AppleToast from '@/components/shared/AppleToast.vue'
-import { getPunchLocationConfig } from '@/config/locations'
-import GeolocationService from '@/services/geolocation'
 
 const punchStore = usePunchStore()
 const userStore = useUserStore()
 
-// 位置配置
-const locationConfig = ref({
-  enabled: false,
-  radiusMeters: 200,
-  allowedLocations: []
-})
-
 // 自动休息功能
-const geolocationService = new GeolocationService()
-const locationWatchId = ref(null)
 const autoBreakEnabled = ref(false)
 const lastInRangeTime = ref(null)
-
-// 从 Firestore 加载配置
-const loadLocationConfig = async () => {
-  try {
-    const docRef = doc(db, 'config', 'punchLocations')
-    const docSnap = await getDoc(docRef)
-    
-    if (docSnap.exists()) {
-      const data = docSnap.data()
-      locationConfig.value = {
-        enabled: data.enabled || false,
-        radiusMeters: data.radiusMeters || 200,
-        allowedLocations: data.enabled ? (data.allowedLocations || []) : []
-      }
-    } else {
-      // 使用本地配置作为后备
-      locationConfig.value = getPunchLocationConfig()
-    }
-  } catch (error) {
-    console.error('加载位置配置失败:', error)
-    // 使用本地配置作为后备
-    locationConfig.value = getPunchLocationConfig()
-  }
-}
-
-// 开始监听位置变化（用于自动休息）
-const startLocationMonitoring = () => {
-  if (!locationConfig.value.enabled || !locationConfig.value.allowedLocations.length) {
-    return
-  }
-
-  try {
-    locationWatchId.value = geolocationService.watchPosition(
-      (position, error) => {
-        if (error) {
-          console.error('位置监听错误:', error)
-          return
-        }
-
-        handleLocationChange(position)
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 30000 // 30秒内允许使用缓存位置
-      }
-    )
-
-    autoBreakEnabled.value = true
-    console.log('开始监听位置变化，用于自动休息')
-  } catch (error) {
-    console.error('启动位置监听失败:', error)
-  }
-}
-
-// 停止监听位置变化
-const stopLocationMonitoring = () => {
-  if (locationWatchId.value) {
-    geolocationService.clearWatch()
-    locationWatchId.value = null
-  }
-  autoBreakEnabled.value = false
-  lastInRangeTime.value = null
-  console.log('停止监听位置变化')
-}
-
-// 处理位置变化
-const handleLocationChange = (position) => {
-  // 只在工作状态下才处理自动休息
-  if (workStatus.value !== 'working') {
-    return
-  }
-
-  const validation = geolocationService.validateLocation(
-    position,
-    locationConfig.value.allowedLocations,
-    locationConfig.value.radiusMeters
-  )
-
-  if (validation.valid) {
-    // 在范围内，重置离开时间
-    lastInRangeTime.value = Date.now()
-  } else {
-    // 不在范围内，检查是否需要自动休息
-    if (!lastInRangeTime.value) {
-      lastInRangeTime.value = Date.now()
-    }
-
-    const timeOutOfRange = Date.now() - lastInRangeTime.value
-    const autoBreakThreshold = 5 * 60 * 1000 // 5分钟
-
-    if (timeOutOfRange >= autoBreakThreshold) {
-      console.log(`用户已离开范围 ${Math.round(timeOutOfRange / 1000 / 60)} 分钟，自动开始休息`)
-      triggerAutoBreak()
-    }
-  }
-}
 
 // 触发自动休息
 const triggerAutoBreak = async () => {
@@ -303,7 +173,6 @@ const currentTime = ref('')
 const currentDate = ref('')
 const loading = ref(false)
 const error = ref('')
-const showLocation = ref(false)
 const showCamera = ref(false)
 const currentPunchType = ref('')
 let timeInterval = null
@@ -427,48 +296,25 @@ const handlePunch = () => {
 // 上班打卡
 const startPunchIn = () => {
   currentPunchType.value = 'in'
-  showLocation.value = true
+  showCamera.value = true
 }
 
-// 下班打卡 - 需要位置验证
+// 下班打卡
 const handlePunchOut = () => {
   currentPunchType.value = 'out'
-  showLocation.value = true
+  submitPunch(null, false)
 }
 
-// 开始休息 - 需要位置验证
+// 开始休息
 const startBreak = () => {
   currentPunchType.value = 'break_start'
-  showLocation.value = true
+  submitPunch(null, false)
 }
 
-// 结束休息 - 需要位置验证
+// 结束休息
 const endBreak = () => {
   currentPunchType.value = 'break_end'
-  showLocation.value = true
-}
-
-// 位置验证完成
-const handleLocationValidated = (result) => {
-  console.log('位置验证结果:', result)
-  showLocation.value = false
-  
-  if (result.valid) {
-    // 上班打卡需要拍照，其他打卡不需要
-    if (currentPunchType.value === 'in') {
-      console.log('位置验证通过,打开相机')
-      showCamera.value = true
-    } else {
-      console.log('位置验证通过,直接提交打卡')
-      submitPunch(null, false)
-    }
-  } else {
-    console.log('位置验证失败:', result.message)
-    error.value = result.message || '位置验证失败'
-    setTimeout(() => {
-      error.value = ''
-    }, 3000)
-  }
+  submitPunch(null, false)
 }
 
 // 拍照完成
@@ -524,7 +370,6 @@ const submitPunch = async (photo, requirePhoto = true) => {
 
 // 取消打卡
 const cancelPunch = () => {
-  showLocation.value = false
   showCamera.value = false
   currentPunchType.value = ''
 }
@@ -533,19 +378,11 @@ onMounted(async () => {
   updateTime()
   timeInterval = setInterval(updateTime, 1000)
   
-  // 加载位置配置
-  await loadLocationConfig()
-  
   // 加载记录和工作状态
   try {
     const userId = userStore.userId
     if (userId) {
       await punchStore.loadRecords(userId)
-      
-      // 如果正在工作，开始监听位置
-      if (workStatus.value === 'working') {
-        startLocationMonitoring()
-      }
     }
   } catch (error) {
     console.error('加载打卡记录失败:', error)
@@ -555,18 +392,6 @@ onMounted(async () => {
 onUnmounted(() => {
   if (timeInterval) {
     clearInterval(timeInterval)
-  }
-  stopLocationMonitoring()
-})
-
-// 监听工作状态变化，启动或停止位置监听
-watch(workStatus, (newStatus, oldStatus) => {
-  if (newStatus === 'working' && oldStatus !== 'working') {
-    // 开始工作，启动位置监听
-    startLocationMonitoring()
-  } else if (newStatus !== 'working' && oldStatus === 'working') {
-    // 停止工作或开始休息，停止位置监听
-    stopLocationMonitoring()
   }
 })
 </script>
