@@ -113,13 +113,14 @@
 
 <script>
 import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '@/store/user'
 
 export default {
   name: 'Login',
   setup() {
     const router = useRouter()
+    const route = useRoute()
     const userStore = useUserStore()
 
     const email = ref('')
@@ -139,7 +140,10 @@ export default {
         loading.value = true
         error.value = ''
         await userStore.login(email.value, password.value)
-        router.push('/')
+        
+        // 检查是否有重定向参数
+        const redirect = route.query.redirect
+        router.push(redirect || '/')
       } catch (err) {
         console.error('登录失败:', err)
         error.value = err.message || '登录失败,请检查邮箱和密码'

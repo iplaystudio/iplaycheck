@@ -1,6 +1,6 @@
 // Firebase配置和初始化 (Spark Plan - 不使用Storage)
 import { initializeApp } from 'firebase/app';
-import { getFirestore, enableIndexedDbPersistence } from 'firebase/firestore';
+import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 
@@ -15,19 +15,16 @@ const firebaseConfig = {
 // 初始化Firebase
 const app = initializeApp(firebaseConfig);
 
+// 初始化Firestore with persistent cache
+export const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({
+    tabManager: persistentMultipleTabManager()
+  })
+});
+
 // 初始化服务 (不使用Storage - 使用ImgBB代替)
-export const db = getFirestore(app);
 export const auth = getAuth(app);
 let messaging = null;
-
-// 启用离线持久化
-enableIndexedDbPersistence(db).catch((err) => {
-  if (err.code === 'failed-precondition') {
-    console.warn('Multiple tabs open, persistence can only be enabled in one tab at a time.');
-  } else if (err.code === 'unimplemented') {
-    console.warn('The current browser does not support persistence.');
-  }
-});
 
 // 初始化消息服务(仅在支持的浏览器中)
 export const initMessaging = async () => {

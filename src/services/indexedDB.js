@@ -34,10 +34,10 @@ export const initDB = async () => {
   });
 };
 
-// 添加打卡记录
+// 添加打卡记录 (如果存在则更新)
 export const addPunchRecord = async (record) => {
   const db = await initDB();
-  return await db.add(PUNCH_STORE, record);
+  return await db.put(PUNCH_STORE, record);
 };
 
 // 获取所有打卡记录
