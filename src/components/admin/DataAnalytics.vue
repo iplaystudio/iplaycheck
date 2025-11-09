@@ -87,7 +87,7 @@
               {{ index + 1 }}
             </div>
             <div class="user-info">
-              <span class="user-name">{{ user.userName || user.userEmail || '未知用户' }}</span>
+              <span class="user-name">{{ user.name || user.email || '未知用户' }}</span>
               <div class="work-time-bar">
                 <div
                   class="work-time-fill" 
