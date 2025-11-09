@@ -44,6 +44,15 @@ const showPrompt = ref(false);
 const deferredPrompt = ref(null);
 
 const install = async () => {
+  // 检查 PWA 兼容性
+  const isPWACompatible = () => {
+    return (
+      'serviceWorker' in navigator &&
+      'BeforeInstallPromptEvent' in window &&
+      window.matchMedia('(display-mode: standalone)').matches === false
+    );
+  };
+
   if (deferredPrompt.value) {
     deferredPrompt.value.prompt();
     const { outcome } = await deferredPrompt.value.userChoice;
@@ -59,8 +68,15 @@ const install = async () => {
     alert('在开发环境中，无法实际安装PWA应用。但在生产环境中，用户会看到浏览器的安装提示。');
     showPrompt.value = false;
   } else {
-    // 在生产环境中，如果没有deferredPrompt，引导用户手动安装
-    alert('您的浏览器可能不支持自动安装PWA。请尝试：\n\n1. 在地址栏点击分享/安装图标\n2. 或在菜单中选择"添加到主屏幕"\n3. 或使用浏览器的安装选项');
+    // 在生产环境中，检查兼容性并提供相应指导
+    const compatible = isPWACompatible();
+
+    if (compatible) {
+      alert('您的浏览器支持PWA安装。请尝试刷新页面或清除缓存后重试。\n\n如果仍然无法安装，请尝试：\n1. 在地址栏右侧查找安装图标\n2. 或按 F12 打开开发者工具，查看控制台错误信息');
+    } else {
+      alert('您的浏览器可能不完全支持PWA安装。请尝试使用以下方法：\n\n1. Chrome/Edge: 在地址栏右侧点击安装图标\n2. Safari: 分享 > 添加到主屏幕\n3. Firefox: 菜单 > 安装此应用\n\n如果您的浏览器不支持PWA，您仍然可以使用网页版应用。');
+    }
+
     showPrompt.value = false;
     localStorage.setItem('pwa-install-dismissed', 'true');
   }
@@ -91,6 +107,15 @@ const showInstallPrompt = () => {
 };
 
 onMounted(() => {
+  // 调试 PWA 兼容性
+  console.log('PWA 兼容性检查:');
+  console.log('- Service Worker 支持:', 'serviceWorker' in navigator);
+  console.log('- BeforeInstallPromptEvent 支持:', 'BeforeInstallPromptEvent' in window);
+  console.log('- HTTPS:', location.protocol === 'https:');
+  console.log('- 已在独立模式:', window.matchMedia('(display-mode: standalone)').matches);
+  console.log('- Manifest URL:', document.querySelector('link[rel="manifest"]')?.href);
+  console.log('- 当前 URL:', location.href);
+
   // 在所有环境中都延迟显示安装提示，给页面加载时间
   setTimeout(() => {
     showInstallPrompt();
@@ -98,6 +123,7 @@ onMounted(() => {
 
   // 监听 beforeinstallprompt 事件
   const handleBeforeInstallPrompt = (e) => {
+    console.log('收到 beforeinstallprompt 事件');
     e.preventDefault();
     deferredPrompt.value = e;
     showInstallPrompt();
