@@ -50,39 +50,51 @@ const install = async () => {
     console.log(`用户响应安装提示: ${outcome}`);
     deferredPrompt.value = null;
     showPrompt.value = false;
+
+    if (outcome === 'accepted') {
+      localStorage.setItem('pwa-installed', 'true');
+    }
   } else if (import.meta.env.DEV) {
     // 在开发环境中显示提示信息
     alert('在开发环境中，无法实际安装PWA应用。但在生产环境中，用户会看到浏览器的安装提示。');
     showPrompt.value = false;
+  } else {
+    // 在生产环境中，如果没有deferredPrompt，引导用户手动安装
+    alert('您的浏览器可能不支持自动安装PWA。请尝试：\n\n1. 在地址栏点击分享/安装图标\n2. 或在菜单中选择"添加到主屏幕"\n3. 或使用浏览器的安装选项');
+    showPrompt.value = false;
+    localStorage.setItem('pwa-install-dismissed', 'true');
   }
 };
 
 const dismiss = () => {
   showPrompt.value = false;
-  if (!import.meta.env.DEV) {
-    localStorage.setItem('pwa-install-dismissed', 'true');
-  }
+  // 在所有环境中都记录用户选择，防止重复提示
+  localStorage.setItem('pwa-install-dismissed', 'true');
 };
 
 const showInstallPrompt = () => {
   const dismissed = localStorage.getItem('pwa-install-dismissed');
-  if (!dismissed) {
+  const installed = localStorage.getItem('pwa-installed');
+
+  if (!dismissed && !installed) {
     // 在开发环境中，即使没有deferredPrompt也显示安装提示
     if (import.meta.env.DEV) {
       showPrompt.value = true;
     } else if (deferredPrompt.value) {
+      showPrompt.value = true;
+    } else {
+      // 在生产环境中，如果没有deferredPrompt但用户还没安装过，仍然显示提示
+      // 让用户知道这是PWA应用
       showPrompt.value = true;
     }
   }
 };
 
 onMounted(() => {
-  // 在开发环境中立即显示安装提示
-  if (import.meta.env.DEV) {
-    setTimeout(() => {
-      showInstallPrompt();
-    }, 2000); // 延迟2秒显示，给页面加载时间
-  }
+  // 在所有环境中都延迟显示安装提示，给页面加载时间
+  setTimeout(() => {
+    showInstallPrompt();
+  }, 3000); // 延迟3秒显示
 
   // 监听 beforeinstallprompt 事件
   const handleBeforeInstallPrompt = (e) => {
@@ -96,6 +108,7 @@ onMounted(() => {
     console.log('PWA 已安装');
     showPrompt.value = false;
     deferredPrompt.value = null;
+    localStorage.setItem('pwa-installed', 'true');
   };
 
   window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
