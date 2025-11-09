@@ -87,7 +87,7 @@
               {{ index + 1 }}
             </div>
             <div class="user-info">
-              <span class="user-name">{{ user.name || user.email || '未知用户' }}</span>
+              <span class="user-name">{{ user.userName || user.userEmail || '未知用户' }}</span>
               <div class="work-time-bar">
                 <div
                   class="work-time-fill" 
@@ -222,6 +222,12 @@ const loadUsers = async () => {
   }
 };
 
+// 获取用户昵称
+const getUserName = (userId) => {
+  const user = usersMap.value.get(userId);
+  return user?.name || user?.email || '未知用户';
+};
+
 const loadAnalytics = async () => {
   if (loading.value) return;
   loading.value = true;
@@ -264,7 +270,7 @@ const loadAnalytics = async () => {
 
     if (weekError) throw weekError;
 
-    const activeUsersSet = new Set(weekRecords.map(r => r.userId));
+    const activeUsersSet = new Set(weekRecords.map(r => r.user_id));
     weekStats.activeUsers = activeUsersSet.size;
     weekStats.totalHours = calculateTotalHours(weekRecords);
     weekStats.attendanceRate = calculateAttendanceRate(weekRecords, activeUsersSet.size);
@@ -396,9 +402,9 @@ const calculateUserWorkHours = (records) => {
   // 转换为数组并排序（工作时长从高到低），同时添加用户信息
   return Object.values(userWorkData)
     .map(user => {
-      const userInfo = usersMap.value.get(user.userId);
+      const userInfo = usersMap.value.get(user.id);
       return {
-        userId: user.userId,
+        userId: user.id,
         userName: userInfo?.name,
         userEmail: userInfo?.email,
         hours: user.total.toFixed(1)
