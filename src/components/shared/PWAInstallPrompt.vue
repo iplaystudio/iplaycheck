@@ -83,7 +83,7 @@ const dismiss = () => {
 const showInstallPrompt = () => {
   const dismissed = localStorage.getItem('pwa-install-dismissed');
 
-  // 只检查是否被手动关闭，不检查是否已安装
+  // 只检查是否被手动关闭，在生产环境下总是显示
   if (!dismissed) {
     showInstallButton.value = true;
   }
@@ -101,7 +101,13 @@ onMounted(() => {
 
   // 在所有环境中都延迟显示安装提示，给页面加载时间
   setTimeout(() => {
-    showInstallPrompt();
+    const dismissed = localStorage.getItem('pwa-install-dismissed');
+    if (!dismissed) {
+      showInstallButton.value = true;
+      console.log('显示PWA安装按钮');
+    } else {
+      console.log('PWA安装按钮已被手动关闭，不显示');
+    }
   }, 3000); // 延迟3秒显示
 
   // 监听 beforeinstallprompt 事件
@@ -109,7 +115,13 @@ onMounted(() => {
     console.log('收到 beforeinstallprompt 事件');
     e.preventDefault();
     deferredPrompt.value = e;
-    showInstallPrompt();
+    // 如果按钮还没显示，现在显示它
+    if (!showInstallButton.value) {
+      const dismissed = localStorage.getItem('pwa-install-dismissed');
+      if (!dismissed) {
+        showInstallButton.value = true;
+      }
+    }
   };
 
   // 监听 appinstalled 事件
