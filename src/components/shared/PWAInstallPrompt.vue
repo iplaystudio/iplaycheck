@@ -89,20 +89,19 @@ const dismiss = () => {
 };
 
 const showInstallPrompt = () => {
-  const dismissed = localStorage.getItem('pwa-install-dismissed');
-  const installed = localStorage.getItem('pwa-installed');
+  // 如果已经在 PWA 独立模式下运行，不显示提示
+  if (window.matchMedia('(display-mode: standalone)').matches) {
+    return;
+  }
 
-  if (!dismissed && !installed) {
-    // 在开发环境中，即使没有deferredPrompt也显示安装提示
-    if (import.meta.env.DEV) {
-      showPrompt.value = true;
-    } else if (deferredPrompt.value) {
-      showPrompt.value = true;
-    } else {
-      // 在生产环境中，如果没有deferredPrompt但用户还没安装过，仍然显示提示
-      // 让用户知道这是PWA应用
-      showPrompt.value = true;
-    }
+  // 移除 dismissed 和 installed 检查，让每次刷新都显示提示
+  if (import.meta.env.DEV) {
+    showPrompt.value = true;
+  } else if (deferredPrompt.value) {
+    showPrompt.value = true;
+  } else {
+    // 在生产环境中，即使没有deferredPrompt也显示提示
+    showPrompt.value = true;
   }
 };
 
