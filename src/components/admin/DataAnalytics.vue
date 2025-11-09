@@ -77,7 +77,7 @@
         <div class="user-work-hours">
           <div
             v-for="(user, index) in userWorkHours"
-            :key="user.userId"
+            :key="user.id"
             class="user-item"
           >
             <div
@@ -87,7 +87,7 @@
               {{ index + 1 }}
             </div>
             <div class="user-info">
-              <span class="user-name">{{ user.userName || user.userEmail || '未知用户' }}</span>
+              <span class="user-name">{{ user.name }}</span>
               <div class="work-time-bar">
                 <div
                   class="work-time-fill" 
@@ -225,7 +225,7 @@ const loadUsers = async () => {
 // 获取用户昵称
 const getUserName = (userId) => {
   const user = usersMap.value.get(userId);
-  return user?.name || user?.email || '未知用户';
+  return user.name;
 };
 
 const loadAnalytics = async () => {
@@ -372,7 +372,7 @@ const calculateUserWorkHours = (records) => {
   records.forEach(record => {
     if (!userWorkData[record.user_id]) {
       userWorkData[record.user_id] = { 
-        userId: record.user_id,
+        user_id: record.user_id,
         in: null, 
         breakStart: null,
         breakTotal: 0,
@@ -402,11 +402,11 @@ const calculateUserWorkHours = (records) => {
   // 转换为数组并排序（工作时长从高到低），同时添加用户信息
   return Object.values(userWorkData)
     .map(user => {
-      const userInfo = usersMap.value.get(user.id);
+      const userInfo = usersMap.value.get(user.user_id);
       return {
-        userId: user.id,
-        userName: userInfo?.name,
-        userEmail: userInfo?.email,
+        id: user.user_id,
+        name: userInfo ? userInfo.name : '未知用户',
+        email: userInfo ? userInfo.email : '',
         hours: user.total.toFixed(1)
       };
     })
@@ -507,7 +507,7 @@ const generateWeeklyTrend = (records) => {
     days.push({
       date: date.toISOString(),
       label: date.toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' }),
-      hours: Math.min(totalHours.toFixed(1), 12)
+      hours: Math.min(parseFloat(totalHours.toFixed(1)), 12)
     });
   }
   return days;
