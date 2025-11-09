@@ -240,7 +240,7 @@ const loadAnalytics = async () => {
     
     // 只统计上班打卡的人数（去重）
     const punchInRecords = todayRecords.filter(r => r.type === 'in');
-    const uniqueUsersSet = new Set(punchInRecords.map(r => r.userId));
+    const uniqueUsersSet = new Set(punchInRecords.map(r => r.user_id));
     
     todayStats.uniqueUsers = uniqueUsersSet.size;
     
@@ -322,8 +322,8 @@ const calculateWorkHoursData = (records) => {
   // 计算实际工作时长（扣除休息时间）
   const userWorkHours = {};
   records.forEach(record => {
-    if (!userWorkHours[record.userId]) {
-      userWorkHours[record.userId] = { 
+    if (!userWorkHours[record.user_id]) {
+      userWorkHours[record.user_id] = { 
         in: null, 
         breakStart: null,
         breakTotal: 0,
@@ -331,7 +331,7 @@ const calculateWorkHoursData = (records) => {
       };
     }
     
-    const userData = userWorkHours[record.userId];
+    const userData = userWorkHours[record.user_id];
     
     if (record.type === 'in') {
       userData.in = new Date(record.timestamp);
@@ -364,9 +364,9 @@ const calculateUserWorkHours = (records) => {
   
   // 计算每个用户的工作时长（扣除休息时间）
   records.forEach(record => {
-    if (!userWorkData[record.userId]) {
-      userWorkData[record.userId] = { 
-        userId: record.userId,
+    if (!userWorkData[record.user_id]) {
+      userWorkData[record.user_id] = { 
+        userId: record.user_id,
         in: null, 
         breakStart: null,
         breakTotal: 0,
@@ -374,7 +374,7 @@ const calculateUserWorkHours = (records) => {
       };
     }
     
-    const userData = userWorkData[record.userId];
+    const userData = userWorkData[record.user_id];
     
     if (record.type === 'in') {
       userData.in = new Date(record.timestamp);
@@ -410,8 +410,8 @@ const calculateUserWorkHours = (records) => {
 const calculateTotalHours = (records) => {
   const userWorkHours = {};
   records.forEach(record => {
-    if (!userWorkHours[record.userId]) {
-      userWorkHours[record.userId] = { 
+    if (!userWorkHours[record.user_id]) {
+      userWorkHours[record.user_id] = { 
         in: null, 
         breakStart: null,
         breakTotal: 0,
@@ -419,7 +419,7 @@ const calculateTotalHours = (records) => {
       };
     }
     
-    const userData = userWorkHours[record.userId];
+    const userData = userWorkHours[record.user_id];
     
     if (record.type === 'in') {
       userData.in = new Date(record.timestamp);
@@ -468,8 +468,8 @@ const generateWeeklyTrend = (records) => {
     // 计算当天的总工作时长（扣除休息时间）
     const userWorkHours = {};
     dayRecords.forEach(record => {
-      if (!userWorkHours[record.userId]) {
-        userWorkHours[record.userId] = { 
+      if (!userWorkHours[record.user_id]) {
+        userWorkHours[record.user_id] = { 
           in: null, 
           breakStart: null,
           breakTotal: 0,
@@ -477,7 +477,7 @@ const generateWeeklyTrend = (records) => {
         };
       }
       
-      const userData = userWorkHours[record.userId];
+      const userData = userWorkHours[record.user_id];
       
       if (record.type === 'in') {
         userData.in = new Date(record.timestamp);

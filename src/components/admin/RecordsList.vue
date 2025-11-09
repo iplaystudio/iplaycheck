@@ -55,7 +55,7 @@
             :key="record.id"
           >
             <td>{{ formatDateTime(record.timestamp) }}</td>
-            <td>{{ getUserName(record.userId) }}</td>
+            <td>{{ getUserName(record.user_id) }}</td>
             <td>
               <span
                 class="type-badge"
@@ -154,7 +154,11 @@
                 </div>
                 <div class="detail-item">
                   <span class="label">用户ID</span>
-                  <span class="value">{{ selectedRecord?.userId }}</span>
+                  <span class="value">{{ selectedRecord?.user_id }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="label">用户名称</span>
+                  <span class="value">{{ getUserName(selectedRecord?.user_id) }}</span>
                 </div>
                 <div class="detail-item">
                   <span class="label">打卡类型</span>
@@ -237,10 +241,10 @@ export default {
 
     const filteredRecords = computed(() => {
       return records.value.filter(record => {
-        const userName = getUserName(record.userId);
+        const userName = getUserName(record.user_id);
         const matchesSearch = !searchQuery.value ||
           userName.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-          record.userId.toLowerCase().includes(searchQuery.value.toLowerCase());
+          record.user_id.toLowerCase().includes(searchQuery.value.toLowerCase());
         
         const matchesType = !filterType.value || record.type === filterType.value;
         
