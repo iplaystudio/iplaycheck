@@ -413,7 +413,7 @@ const handlePunch = async () => {
     const punchType = workStatus.value === 'working' ? 'out' : 'in';
 
     // 检查是否需要拍照
-    const needPhoto = true; // 可以在这里添加配置来控制是否需要照片
+    const needPhoto = punchType === 'in'; // 只有上班打卡需要拍照
     if (needPhoto && !photoData.value) {
       // 显示拍照界面
       currentPunchType.value = punchType;
@@ -462,7 +462,7 @@ const startBreak = () => {
 // 结束休息
 const endBreak = () => {
   currentPunchType.value = 'break_end'
-  submitPunch(null, false)
+  showCamera.value = true
 }
 
 // 拍照完成
