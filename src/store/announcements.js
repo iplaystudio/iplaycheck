@@ -1,6 +1,6 @@
 // 公告状态管理
 import { defineStore } from 'pinia';
-import { announcementsService } from '@/services/supabase';
+import { announcementsService, pushSubscriptionService } from '@/services/supabase';
 import { supabase } from '@/services/supabase';
 
 // 获取正确的图标路径
@@ -239,10 +239,23 @@ export const useAnnouncementsStore = defineStore('announcements', {
           return;
         }
 
-        console.log(`向 ${subscriptions.length} 个订阅发送推送通知...`);
+        // 清理无效的订阅
+        await pushSubscriptionService.cleanupInvalidSubscriptions();
+
+        // 重新获取有效的订阅
+        const { data: validSubscriptionsData, error: refetchError } = await supabase
+          .from('push_subscriptions')
+          .select('subscription');
+
+        if (refetchError || !validSubscriptionsData) {
+          console.warn('重新获取推送订阅失败:', refetchError);
+          return;
+        }
+
+        console.log(`向 ${validSubscriptionsData.length} 个订阅发送推送通知...`);
 
         // 调用Supabase Edge Function发送推送通知
-        const pushPromises = subscriptions.map(async (sub) => {
+        const pushPromises = validSubscriptionsData.map(async (sub) => {
           try {
             const response = await fetch('https://emrxsjfcxwaluwppgyzj.supabase.co/functions/v1/send-push-notification', {
               method: 'POST',
@@ -284,7 +297,7 @@ export const useAnnouncementsStore = defineStore('announcements', {
         const results = await Promise.allSettled(pushPromises);
         const successCount = results.filter(r => r.status === 'fulfilled' && r.value.success).length;
 
-        console.log(`推送通知完成: ${successCount}/${subscriptions.length} 成功`);
+        console.log(`推送通知完成: ${successCount}/${validSubscriptionsData.length} 成功`);
 
       } catch (error) {
         console.warn('推送通知发送过程出错:', error);

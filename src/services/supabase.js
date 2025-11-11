@@ -291,6 +291,33 @@ export const pushSubscriptionService = {
 
     if (error) throw error;
     return data || [];
+  },
+
+  // 清理无效的推送订阅
+  async cleanupInvalidSubscriptions() {
+    try {
+      const { data: subscriptions, error } = await supabase
+        .from('push_subscriptions')
+        .select('id, subscription');
+
+      if (error) throw error;
+
+      const invalidIds = subscriptions
+        .filter(sub => sub.subscription?.endpoint?.includes('permanently-removed.invalid'))
+        .map(sub => sub.id);
+
+      if (invalidIds.length > 0) {
+        const { error: deleteError } = await supabase
+          .from('push_subscriptions')
+          .delete()
+          .in('id', invalidIds);
+
+        if (deleteError) throw deleteError;
+        console.log(`清理了 ${invalidIds.length} 个无效的推送订阅`);
+      }
+    } catch (error) {
+      // 清理无效订阅失败 - removed console.error for production
+    }
   }
 };
 
