@@ -149,7 +149,7 @@
 
               <div class="modal-actions">
                 <AppleButton
-                  variant="outline"
+                  variant="secondary"
                   type="button"
                   @click="testNotification"
                   style="margin-right: 10px;"
@@ -372,11 +372,17 @@ export default {
     };
 
     const testNotification = () => {
+      // 获取正确的图标路径
+      const getIconPath = () => {
+        const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+        return isProduction ? '/iplaycheck/icon.jpg' : '/icon.jpg';
+      };
+
       if ('Notification' in window) {
         if (Notification.permission === 'granted') {
           const notification = new Notification('测试通知', {
             body: '这是推送通知功能的测试消息',
-            icon: '/icon-192x192.png',
+            icon: getIconPath(),
             tag: 'test-notification'
           });
           notification.onclick = () => {

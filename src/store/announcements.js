@@ -3,6 +3,19 @@ import { defineStore } from 'pinia';
 import { announcementsService } from '@/services/supabase';
 import { supabase } from '@/services/supabase';
 
+// 获取正确的图标路径
+const getIconPath = () => {
+  // 检查是否在浏览器环境中
+  if (typeof window === 'undefined') {
+    return '/icon.jpg'; // 服务端默认路径
+  }
+
+  // 生产环境使用 /iplaycheck/icon.jpg，开发环境使用 /icon.jpg
+  const isProduction = window.location.hostname !== 'localhost' &&
+    window.location.hostname !== '127.0.0.1';
+  return isProduction ? '/iplaycheck/icon.jpg' : '/icon.jpg';
+};
+
 export const useAnnouncementsStore = defineStore('announcements', {
   state: () => ({
     announcements: [],
@@ -89,23 +102,25 @@ export const useAnnouncementsStore = defineStore('announcements', {
         // 向每个订阅发送推送
         const pushPromises = subscriptions.map(async (sub) => {
           try {
+            const pushPayload = JSON.stringify({
+              title: '新公告',
+              body: announcement.title,
+              icon: getIconPath(),
+              badge: getIconPath(),
+              tag: `announcement-${announcement.id}`,
+              data: {
+                type: 'announcement',
+                announcementId: announcement.id
+              }
+            });
+
             const response = await fetch(sub.subscription.endpoint, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
                 'TTL': '86400' // 24小时
               },
-              body: JSON.stringify({
-                title: '新公告',
-                body: announcement.title,
-                icon: '/icon.jpg',
-                badge: '/icon.jpg',
-                tag: `announcement-${announcement.id}`,
-                data: {
-                  type: 'announcement',
-                  announcementId: announcement.id
-                }
-              })
+              body: pushPayload
             });
 
             return {
@@ -129,8 +144,8 @@ export const useAnnouncementsStore = defineStore('announcements', {
         if ('Notification' in window && Notification.permission === 'granted') {
           new Notification('新公告', {
             body: announcement.title,
-            icon: '/icon.jpg',
-            badge: '/icon.jpg',
+            icon: getIconPath(),
+            badge: getIconPath(),
             tag: `announcement-${announcement.id}`,
             requireInteraction: false,
             data: { announcementId: announcement.id }
@@ -141,8 +156,8 @@ export const useAnnouncementsStore = defineStore('announcements', {
         if ('Notification' in window && Notification.permission === 'granted') {
           new Notification('新公告', {
             body: announcement.title,
-            icon: '/icon.jpg',
-            badge: '/icon.jpg'
+            icon: getIconPath(),
+            badge: getIconPath()
           });
         }
       }
@@ -187,7 +202,7 @@ export const useAnnouncementsStore = defineStore('announcements', {
             body: announcement.content.length > 100
               ? announcement.content.substring(0, 100) + '...'
               : announcement.content,
-            icon: '/icon.jpg',
+            icon: getIconPath(),
             tag: `announcement-${announcement.id}`,
             requireInteraction: true,
             data: {
@@ -242,8 +257,8 @@ export const useAnnouncementsStore = defineStore('announcements', {
                   body: announcement.content.length > 100
                     ? announcement.content.substring(0, 100) + '...'
                     : announcement.content,
-                  icon: '/icon.jpg',
-                  badge: '/icon.jpg',
+                  icon: getIconPath(),
+                  badge: getIconPath(),
                   tag: `announcement-${announcement.id}`,
                   requireInteraction: true,
                   data: {

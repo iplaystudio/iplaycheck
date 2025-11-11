@@ -9,10 +9,16 @@ self.addEventListener('push', (event) => {
     data = event.data.json();
   }
 
+  // 获取正确的图标路径
+  const getIconPath = () => {
+    const isProduction = self.location.hostname !== 'localhost' && self.location.hostname !== '127.0.0.1';
+    return isProduction ? '/iplaycheck/icon.jpg' : '/icon.jpg';
+  };
+
   const options = {
     body: data.notification?.body || data.body || '您有新的消息',
-    icon: data.notification?.icon || '/icon.jpg',
-    badge: data.notification?.badge || '/icon.jpg',
+    icon: data.notification?.icon || getIconPath(),
+    badge: data.notification?.badge || getIconPath(),
     tag: data.notification?.tag || data.data?.announcementId || 'time-tracking-notification',
     requireInteraction: data.notification?.requireInteraction || false,
     data: data.data || data,
