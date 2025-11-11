@@ -149,6 +149,14 @@
 
               <div class="modal-actions">
                 <AppleButton
+                  variant="outline"
+                  type="button"
+                  @click="testNotification"
+                  style="margin-right: 10px;"
+                >
+                  测试通知
+                </AppleButton>
+                <AppleButton
                   variant="secondary"
                   type="button"
                   @click="closeModal"
@@ -363,6 +371,28 @@ export default {
       }
     };
 
+    const testNotification = () => {
+      if ('Notification' in window) {
+        if (Notification.permission === 'granted') {
+          const notification = new Notification('测试通知', {
+            body: '这是推送通知功能的测试消息',
+            icon: '/icon-192x192.png',
+            tag: 'test-notification'
+          });
+          notification.onclick = () => {
+            window.focus();
+            notification.close();
+          };
+        } else if (Notification.permission === 'default') {
+          alert('请先授权通知权限，然后再测试推送通知功能');
+        } else {
+          alert('通知权限已被拒绝，请在浏览器设置中重新授权');
+        }
+      } else {
+        alert('您的浏览器不支持推送通知功能');
+      }
+    };
+
     const closeModal = () => {
       showCreateModal.value = false;
       editingAnnouncement.value = null;
@@ -440,7 +470,8 @@ export default {
       openCreateModal,
       formatDate,
       truncateContent,
-      toggleExpanded
+      toggleExpanded,
+      testNotification
     };
   }
 };
