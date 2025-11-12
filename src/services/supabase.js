@@ -21,87 +21,8 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 export const auth = supabase.auth;
 export const db = supabase;
 
-// 初始化消息服务 (Supabase没有内置推送，需要使用Web Push API)
 
-// 初始化推送通知服务 (使用原生Web Push API)
-export const initMessaging = async () => {
-  try {
-    if ('serviceWorker' in navigator && 'PushManager' in window) {
-      if (import.meta.env.DEV) {
-        // 开发环境中手动注册推送 Service Worker
-        const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-        return registration;
-      } else {
-        // 生产环境中使用 PWA Service Worker
-        const registration = await navigator.serviceWorker.getRegistration();
-        if (registration) {
-          return registration;
-        }
-        // 如果没有注册的 SW，等待 registerServiceWorker.js 完成注册
-        return new Promise((resolve) => {
-          navigator.serviceWorker.addEventListener('controllerchange', () => {
-            resolve(navigator.serviceWorker.controller);
-          });
-        });
-      }
-    }
-  } catch (error) {
-    // Messaging initialization error - removed console.error for production
-  }
-  return null;
-};
 
-// 请求通知权限并获取推送订阅 (使用Web Push API)
-export const requestNotificationPermission = async () => {
-  try {
-    // 检查权限状态
-    if (typeof Notification !== 'undefined' && Notification.permission === 'denied') {
-      return { status: 'denied', subscription: null };
-    }
-
-    const permission = await Notification.requestPermission();
-    if (permission === 'granted') {
-      const registration = await initMessaging();
-      if (registration) {
-        // 获取推送订阅 (需要VAPID key)
-        const vapidKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
-        if (vapidKey) {
-          const subscription = await registration.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: vapidKey
-          });
-
-          // 保存订阅到数据库
-          try {
-            await pushSubscriptionService.saveSubscription(subscription);
-          } catch (saveError) {
-            // 保存推送订阅失败 - removed console.error for production
-          }
-
-          return { status: 'granted', subscription };
-        }
-        return { status: 'granted', subscription: null };
-      }
-      return { status: 'granted', subscription: null };
-    }
-
-    return { status: permission, subscription: null };
-  } catch (error) {
-    // Notification permission error - removed console.error for production
-    return { status: 'error', error, subscription: null };
-  }
-};
-
-// 监听前台推送消息
-export const onForegroundMessage = (callback) => {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.addEventListener('message', (event) => {
-      if (event.data && event.data.type === 'push') {
-        callback(event.data.payload);
-      }
-    });
-  }
-};
 
 // 公告相关功能
 export const announcementsService = {
