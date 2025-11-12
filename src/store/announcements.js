@@ -1,6 +1,6 @@
 // 公告状态管理
 import { defineStore } from 'pinia';
-import { announcementsService, pushSubscriptionService } from '@/services/supabase';
+import { announcementsService } from '@/services/supabase';
 import { supabase } from '@/services/supabase';
 
 // 获取正确的图标路径
@@ -20,8 +20,7 @@ export const useAnnouncementsStore = defineStore('announcements', {
   state: () => ({
     announcements: [],
     loading: false,
-    error: null,
-    subscription: null
+    error: null
   }),
 
   getters: {
@@ -89,218 +88,14 @@ export const useAnnouncementsStore = defineStore('announcements', {
       }
     },
 
-    // 发送推送通知 (使用原生Web Push API)
-    async sendNotification(announcement) {
-      try {
-        // 获取所有用户的推送订阅
-        const subscriptions = await this.announcementsService.getAllActiveSubscriptions();
-
-        if (subscriptions.length === 0) {
-          return;
-        }
-
-        // 向每个订阅发送推送
-        const pushPromises = subscriptions.map(async (sub) => {
-          try {
-            const pushPayload = JSON.stringify({
-              title: '新公告',
-              body: announcement.title,
-              icon: getIconPath(),
-              badge: getIconPath(),
-              tag: `announcement-${announcement.id}`,
-              data: {
-                type: 'announcement',
-                announcementId: announcement.id
-              }
-            });
-
-            const response = await fetch(sub.subscription.endpoint, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'TTL': '86400' // 24小时
-              },
-              body: pushPayload
-            });
-
-            return {
-              endpoint: sub.subscription.endpoint,
-              success: response.ok,
-              status: response.status
-            };
-          } catch (error) {
-            return {
-              endpoint: sub.subscription.endpoint,
-              success: false,
-              error: error.message
-            };
-          }
-        });
-
-        const results = await Promise.all(pushPromises);
-        const successCount = results.filter(r => r.success).length;
-
-        // 同时显示浏览器原生通知（前台通知）
-        if ('Notification' in window && Notification.permission === 'granted') {
-          new Notification('新公告', {
-            body: announcement.title,
-            icon: getIconPath(),
-            badge: getIconPath(),
-            tag: `announcement-${announcement.id}`,
-            requireInteraction: false,
-            data: { announcementId: announcement.id }
-          });
-        }
-      } catch (error) {
-        // 如果推送失败，至少显示浏览器原生通知
-        if ('Notification' in window && Notification.permission === 'granted') {
-          new Notification('新公告', {
-            body: announcement.title,
-            icon: getIconPath(),
-            badge: getIconPath()
-          });
-        }
-      }
-    },
-
-    // 取消订阅
-    unsubscribe() {
-      if (this.subscription) {
-        this.subscription.unsubscribe();
-        this.subscription = null;
-      }
-    },
-
     // 创建公告（管理员）
     async createAnnouncement(announcement) {
       try {
         const newAnn = await announcementsService.createAnnouncement(announcement);
-
-        // 如果公告设置为立即发布，发送推送通知
-        if (announcement.is_active) {
-          try {
-            await this.sendPushNotification(newAnn);
-          } catch (pushError) {
-            console.warn('推送通知发送失败，但公告已创建:', pushError);
-          }
-        }
-
         return newAnn;
       } catch (error) {
         this.error = error.message;
         throw error;
-      }
-    },
-
-    // 发送推送通知
-    async sendPushNotification(announcement) {
-      try {
-        // 检查浏览器通知权限
-        if ('Notification' in window && Notification.permission === 'granted') {
-          // 在当前浏览器显示通知（仅用于测试）
-          const notification = new Notification(announcement.title, {
-            body: announcement.content.length > 100
-              ? announcement.content.substring(0, 100) + '...'
-              : announcement.content,
-            icon: getIconPath(),
-            tag: `announcement-${announcement.id}`,
-            requireInteraction: true,
-            data: {
-              type: 'announcement',
-              announcementId: announcement.id,
-              url: '/'
-            }
-          });
-
-          // 点击通知跳转到首页
-          notification.onclick = () => {
-            window.focus();
-            notification.close();
-          };
-
-          console.log('本地通知已发送:', announcement.title);
-        } else {
-          console.log('浏览器通知权限未授权，跳过推送通知');
-        }
-
-        // 🚀 实现完整的服务器端推送通知到所有订阅用户
-        // 获取所有用户的推送订阅
-        const { data: subscriptions, error } = await supabase
-          .from('push_subscriptions')
-          .select('subscription');
-
-        if (error) {
-          console.warn('获取推送订阅失败:', error);
-          return;
-        }
-
-        if (!subscriptions || subscriptions.length === 0) {
-          console.log('没有找到推送订阅');
-          return;
-        }
-
-        // 清理无效的订阅
-        await pushSubscriptionService.cleanupInvalidSubscriptions();
-
-        // 重新获取有效的订阅
-        const { data: validSubscriptionsData, error: refetchError } = await supabase
-          .from('push_subscriptions')
-          .select('subscription');
-
-        if (refetchError || !validSubscriptionsData) {
-          console.warn('重新获取推送订阅失败:', refetchError);
-          return;
-        }
-
-        console.log(`向 ${validSubscriptionsData.length} 个订阅发送推送通知...`);
-
-        // 调用Supabase Edge Function发送推送通知
-        const pushPromises = validSubscriptionsData.map(async (sub) => {
-          try {
-            const response = await fetch('https://emrxsjfcxwaluwppgyzj.supabase.co/functions/v1/send-push-notification', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
-              },
-              body: JSON.stringify({
-                subscription: sub.subscription,
-                payload: {
-                  title: announcement.title,
-                  body: announcement.content.length > 100
-                    ? announcement.content.substring(0, 100) + '...'
-                    : announcement.content,
-                  icon: getIconPath(),
-                  badge: getIconPath(),
-                  tag: `announcement-${announcement.id}`,
-                  requireInteraction: true,
-                  data: {
-                    type: 'announcement',
-                    announcementId: announcement.id,
-                    url: '/'
-                  }
-                }
-              })
-            });
-
-            if (!response.ok) {
-              throw new Error(`推送失败: ${response.status}`);
-            }
-
-            return { success: true, endpoint: sub.subscription.endpoint };
-          } catch (error) {
-            console.warn('发送推送通知失败:', error);
-            return { success: false, endpoint: sub.subscription.endpoint, error: error.message };
-          }
-        });
-
-        const results = await Promise.allSettled(pushPromises);
-        const successCount = results.filter(r => r.status === 'fulfilled' && r.value.success).length;
-
-        console.log(`推送通知完成: ${successCount}/${validSubscriptionsData.length} 成功`);
-
-      } catch (error) {
-        console.warn('推送通知发送过程出错:', error);
       }
     },
 

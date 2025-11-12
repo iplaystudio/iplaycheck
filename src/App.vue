@@ -162,9 +162,6 @@
     <!-- PWA安装提示 -->
     <PWAInstallPrompt />
 
-    <!-- 推送通知提示 -->
-    <PushNotificationPrompt />
-
     <!-- 当通知权限被阻止时给出指引 -->
     <AppleToast
       v-model:visible="toastVisible"
@@ -180,7 +177,6 @@ import { useUserStore } from '@/store/user';
 import syncService from '@/services/sync';
 import { requestNotificationPermission } from '@/services/supabase';
 import PWAInstallPrompt from '@/components/shared/PWAInstallPrompt.vue';
-import PushNotificationPrompt from '@/components/shared/PushNotificationPrompt.vue';
 import AppleToast from '@/components/shared/AppleToast.vue';
 
 export default {
@@ -188,7 +184,6 @@ export default {
 
   components: {
     PWAInstallPrompt,
-    PushNotificationPrompt,
     AppleToast
   },
 
