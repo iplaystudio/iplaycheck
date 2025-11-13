@@ -116,6 +116,14 @@ export const useAnnouncementsStore = defineStore('announcements', {
         this.error = error.message;
         throw error;
       }
+    },
+
+    // 取消订阅实时更新
+    unsubscribe() {
+      if (this.subscription) {
+        this.subscription.unsubscribe();
+        this.subscription = null;
+      }
     }
   }
 });
