@@ -56,7 +56,7 @@ const install = async () => {
   if (deferredPrompt.value) {
     deferredPrompt.value.prompt();
     const { outcome } = await deferredPrompt.value.userChoice;
-    console.log(`用户响应安装提示: ${outcome}`);
+    // 用户响应安装提示 - removed console.log for production
     deferredPrompt.value = null;
     showPrompt.value = false;
 
@@ -106,14 +106,7 @@ const showInstallPrompt = () => {
 };
 
 onMounted(() => {
-  // 调试 PWA 兼容性
-  console.log('PWA 兼容性检查:');
-  console.log('- Service Worker 支持:', 'serviceWorker' in navigator);
-  console.log('- BeforeInstallPromptEvent 支持:', 'BeforeInstallPromptEvent' in window);
-  console.log('- HTTPS:', location.protocol === 'https:');
-  console.log('- 已在独立模式:', window.matchMedia('(display-mode: standalone)').matches);
-  console.log('- Manifest URL:', document.querySelector('link[rel="manifest"]')?.href);
-  console.log('- 当前 URL:', location.href);
+  // PWA 兼容性检查 - removed console.log for production
 
   // 在所有环境中都延迟显示安装提示，给页面加载时间
   setTimeout(() => {
@@ -122,7 +115,7 @@ onMounted(() => {
 
   // 监听 beforeinstallprompt 事件
   const handleBeforeInstallPrompt = (e) => {
-    console.log('收到 beforeinstallprompt 事件');
+    // 收到 beforeinstallprompt 事件 - removed console.log for production
     e.preventDefault();
     deferredPrompt.value = e;
     showInstallPrompt();
@@ -130,7 +123,7 @@ onMounted(() => {
 
   // 监听 appinstalled 事件
   const handleAppInstalled = () => {
-    console.log('PWA 已安装');
+    // PWA 已安装 - removed console.log for production
     showPrompt.value = false;
     deferredPrompt.value = null;
     localStorage.setItem('pwa-installed', 'true');

@@ -6,15 +6,17 @@
         <AppleButton
           variant="danger"
           size="medium"
+          fullWidth
           @click="showClearConfirm = true"
         >
-          清空所有记录
+          清空记录
         </AppleButton>
         <AppleButton
           variant="primary"
           size="medium"
           :disabled="loading"
           :loading="loading"
+          fullWidth
           @click="refreshData"
         >
           刷新
@@ -139,6 +141,7 @@
     <AppleCard class="dashboard-content">
       <RecordsList v-if="activeTab === 'records'" />
       <UserManagement v-if="activeTab === 'users'" />
+      <AnnouncementsManagement v-if="activeTab === 'announcements'" />
       <DataAnalytics v-if="activeTab === 'analytics'" />
     </AppleCard>
 
@@ -172,7 +175,7 @@
             </p>
             <ul class="warning-list">
               <li>所有用户的打卡记录</li>
-              <li>Firebase 云端数据</li>
+              <li>Supabase 云端数据</li>
               <li>本地 IndexedDB 数据</li>
             </ul>
             <p class="warning-text danger">
@@ -227,6 +230,7 @@ import AppleLoading from '@/components/shared/AppleLoading.vue';
 import AppleToast from '@/components/shared/AppleToast.vue';
 import RecordsList from './RecordsList.vue';
 import UserManagement from './UserManagement.vue';
+import AnnouncementsManagement from './AnnouncementsManagement.vue';
 import DataAnalytics from './DataAnalytics.vue';
 
 export default {
@@ -239,6 +243,7 @@ export default {
     AppleToast,
     RecordsList,
     UserManagement,
+    AnnouncementsManagement,
     DataAnalytics
   },
 
@@ -254,6 +259,7 @@ export default {
     const tabs = [
       { id: 'records', label: '打卡记录' },
       { id: 'users', label: '用户管理' },
+      { id: 'announcements', label: '公告管理' },
       { id: 'analytics', label: '数据分析' }
     ];
 
@@ -616,8 +622,32 @@ export default {
     font: var(--title-1-emphasized);
   }
 
+  .header-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+  }
+
   .dashboard-stats {
     grid-template-columns: 1fr;
+  }
+
+  .stat-content {
+    padding: 12px;
+  }
+
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .stat-icon svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .stat-value {
+    font: var(--title-1-emphasized);
   }
 
   .dashboard-tabs {
@@ -628,6 +658,11 @@ export default {
   .tab-btn {
     flex: 1;
     min-width: 100px;
+  }
+
+  .modal-card.confirm-modal {
+    width: 95%;
+    max-width: none;
   }
 }
 </style>

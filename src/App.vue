@@ -161,12 +161,6 @@
 
     <!-- PWA安装提示 -->
     <PWAInstallPrompt />
-    <!-- 当通知权限被阻止时给出指引 -->
-    <AppleToast
-      v-model:visible="toastVisible"
-      :message="toastMessage"
-      :type="toastType"
-    />
   </div>
 </template>
 
@@ -174,16 +168,13 @@
 import { computed, ref } from 'vue';
 import { useUserStore } from '@/store/user';
 import syncService from '@/services/sync';
-import { requestNotificationPermission } from '@/services/supabase';
 import PWAInstallPrompt from '@/components/shared/PWAInstallPrompt.vue';
-import AppleToast from '@/components/shared/AppleToast.vue';
 
 export default {
   name: 'App',
 
   components: {
-    PWAInstallPrompt,
-    AppleToast
+    PWAInstallPrompt
   },
 
   setup() {
@@ -191,11 +182,6 @@ export default {
 
   const isAuthenticated = computed(() => userStore.isAuthenticated);
   const isAdmin = computed(() => userStore.isAdmin);
-
-  // toast 状态，用于在用户拒绝通知权限时给出操作指引
-  const toastVisible = ref(false);
-  const toastMessage = ref('');
-  const toastType = ref('warning');
 
     // 初始化应用
     const initApp = async () => {
@@ -205,28 +191,6 @@ export default {
       // 启动自动同步
       if (userStore.isAuthenticated) {
         syncService.startAutoSync(60000); // 每分钟同步一次
-
-        // 请求通知权限，优雅处理被拒绝或已被阻止的情况
-        try {
-          // 先在页面层判断是否已经被浏览器阻止
-          if (typeof Notification !== 'undefined' && Notification.permission === 'denied') {
-            toastMessage.value = '已阻止通知权限。请点击地址栏左侧的锁/信息图标，找到“通知”并允许。';
-            toastType.value = 'warning';
-            toastVisible.value = true;
-          } else {
-            const res = await requestNotificationPermission();
-            if (res && res.status === 'denied') {
-              toastMessage.value = '通知权限被拒绝。可在浏览器站点设置中恢复。';
-              toastType.value = 'warning';
-              toastVisible.value = true;
-            } else if (res && res.status === 'granted') {
-              // 可选：提示成功或静默处理
-              console.log('通知权限已授予');
-            }
-          }
-        } catch (error) {
-          console.error('通知权限请求失败:', error);
-        }
       }
     };
 
@@ -237,10 +201,7 @@ export default {
 
     return {
       isAuthenticated,
-      isAdmin,
-      toastVisible,
-      toastMessage,
-      toastType
+      isAdmin
     };
   }
 };

@@ -10,36 +10,81 @@
       </AppleButton>
     </div>
 
-    <AppleCard class="users-table">
-      <table>
-        <thead>
-          <tr>
-            <th>用户ID</th>
-            <th>姓名</th>
-            <th>邮箱</th>
-            <th>角色</th>
-            <th>创建时间</th>
-            <th>操作</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="user in users"
-            :key="user.id"
-          >
-            <td>{{ user.id }}</td>
-            <td>{{ user.name }}</td>
-            <td>{{ user.email }}</td>
-            <td>
-              <span
-                class="role-badge"
-                :class="`role-${user.role}`"
-              >
-                {{ getRoleName(user.role) }}
-              </span>
-            </td>
-            <td>{{ formatDate(user.created_at) }}</td>
-            <td class="action-cell">
+    <div class="users-container">
+      <!-- 桌面端表格视图 -->
+      <AppleCard
+        v-if="!isMobile"
+        class="users-table"
+      >
+        <table>
+          <thead>
+            <tr>
+              <th>用户ID</th>
+              <th>姓名</th>
+              <th>邮箱</th>
+              <th>角色</th>
+              <th>创建时间</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="user in users"
+              :key="user.id"
+            >
+              <td>{{ user.id }}</td>
+              <td>{{ user.name }}</td>
+              <td>{{ user.email }}</td>
+              <td>
+                <span
+                  class="role-badge"
+                  :class="`role-${user.role}`"
+                >
+                  {{ getRoleName(user.role) }}
+                </span>
+              </td>
+              <td>{{ formatDate(user.created_at) }}</td>
+              <td class="action-cell">
+                <AppleButton
+                  variant="secondary"
+                  size="small"
+                  @click="editUser(user)"
+                >
+                  编辑
+                </AppleButton>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </AppleCard>
+
+      <!-- 移动端卡片视图 -->
+      <div
+        v-else
+        class="users-cards"
+      >
+        <AppleCard
+          v-for="user in users"
+          :key="user.id"
+          class="user-card"
+          hoverable
+        >
+          <div class="card-header">
+            <div class="card-name">{{ user.name }}</div>
+            <span
+              class="role-badge"
+              :class="`role-${user.role}`"
+            >
+              {{ getRoleName(user.role) }}
+            </span>
+          </div>
+          <div class="card-content">
+            <div class="card-info">
+              <div class="card-email">{{ user.email }}</div>
+              <div class="card-id">ID: {{ user.id }}</div>
+              <div class="card-date">创建时间: {{ formatDate(user.created_at) }}</div>
+            </div>
+            <div class="card-actions">
               <AppleButton
                 variant="secondary"
                 size="small"
@@ -47,11 +92,11 @@
               >
                 编辑
               </AppleButton>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </AppleCard>
+            </div>
+          </div>
+        </AppleCard>
+      </div>
+    </div>
 
     <!-- 添加/编辑用户对话框 -->
     <Teleport to="body">
@@ -127,7 +172,7 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { supabase } from '@/services/supabase';
 import AppleButton from '@/components/shared/AppleButton.vue';
 import AppleCard from '@/components/shared/AppleCard.vue';
@@ -168,6 +213,10 @@ export default {
     const getRoleName = (role) => {
       return role === 'admin' ? '管理员' : '普通用户';
     };
+
+    const isMobile = computed(() => {
+      return window.innerWidth <= 768;
+    });
 
     const formatDate = (timestamp) => {
       if (!timestamp) return '未知时间';
@@ -300,6 +349,7 @@ export default {
 
     return {
       users,
+      isMobile,
       showAddUserModal,
       showEditUserModal,
       userForm,
@@ -316,6 +366,67 @@ export default {
 <style scoped>
 .user-management {
   width: 100%;
+}
+
+.users-container {
+  width: 100%;
+}
+
+.users-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.user-card {
+  transition: transform 0.2s ease;
+}
+
+.user-card:hover {
+  transform: translateY(-2px);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.card-name {
+  font: var(--title-3-emphasized);
+  color: var(--systemPrimary);
+}
+
+.card-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.card-info {
+  flex: 1;
+}
+
+.card-email {
+  font: var(--body);
+  color: var(--systemPrimary);
+  margin-bottom: 4px;
+}
+
+.card-id {
+  font: var(--caption-1);
+  color: var(--systemSecondary);
+  margin-bottom: 4px;
+}
+
+.card-date {
+  font: var(--caption-1);
+  color: var(--systemSecondary);
+}
+
+.card-actions {
+  margin-left: 16px;
 }
 
 .management-header {

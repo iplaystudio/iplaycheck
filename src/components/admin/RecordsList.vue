@@ -37,60 +37,117 @@
       </div>
     </div>
 
-    <div class="records-table">
-      <table>
-        <thead>
-          <tr>
-            <th>时间</th>
-            <th>用户</th>
-            <th>类型</th>
-            <th>照片</th>
-            <th>同步状态</th>
-            <th>操作</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="record in filteredRecords"
-            :key="record.id"
-          >
-            <td>{{ formatDateTime(record.timestamp) }}</td>
-            <td>{{ getUserName(record.user_id) }}</td>
-            <td>
+    <div class="records-container">
+      <!-- 桌面端表格视图 -->
+      <div
+        v-if="!isMobile"
+        class="records-table"
+      >
+        <table>
+          <thead>
+            <tr>
+              <th>时间</th>
+              <th>用户</th>
+              <th>类型</th>
+              <th>照片</th>
+              <th>同步状态</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="record in filteredRecords"
+              :key="record.id"
+            >
+              <td>{{ formatDateTime(record.timestamp) }}</td>
+              <td>{{ getUserName(record.user_id) }}</td>
+              <td>
+                <span
+                  class="type-badge"
+                  :class="`type-${record.type}`"
+                >
+                  {{ getTypeName(record.type) }}
+                </span>
+              </td>
+              <td>
+                <button
+                  class="btn-icon"
+                  @click="viewPhoto(record)"
+                >
+                  📷
+                </button>
+              </td>
+              <td>
+                <span
+                  class="sync-badge"
+                  :class="record.synced ? 'synced' : 'pending'"
+                >
+                  {{ record.synced ? '已同步' : '待同步' }}
+                </span>
+              </td>
+              <td>
+                <button
+                  class="btn-action"
+                  @click="viewDetails(record)"
+                >
+                  查看
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 移动端卡片视图 -->
+      <div
+        v-else
+        class="records-cards"
+      >
+        <AppleCard
+          v-for="record in filteredRecords"
+          :key="record.id"
+          class="record-card"
+          hoverable
+          @click="viewDetails(record)"
+        >
+          <div class="card-header">
+            <div class="card-time">{{ formatDateTime(record.timestamp) }}</div>
+            <div class="card-actions">
               <span
                 class="type-badge"
                 :class="`type-${record.type}`"
               >
                 {{ getTypeName(record.type) }}
               </span>
-            </td>
-            <td>
-              <button
-                class="btn-icon"
-                @click="viewPhoto(record)"
-              >
-                📷
-              </button>
-            </td>
-            <td>
               <span
                 class="sync-badge"
                 :class="record.synced ? 'synced' : 'pending'"
               >
                 {{ record.synced ? '已同步' : '待同步' }}
               </span>
-            </td>
-            <td>
+            </div>
+          </div>
+          <div class="card-content">
+            <div class="card-user">
+              <strong>{{ getUserName(record.user_id) }}</strong>
+            </div>
+            <div class="card-buttons">
+              <button
+                class="btn-icon"
+                @click.stop="viewPhoto(record)"
+              >
+                📷 照片
+              </button>
               <button
                 class="btn-action"
-                @click="viewDetails(record)"
+                @click.stop="viewDetails(record)"
               >
-                查看
+                查看详情
               </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+            </div>
+          </div>
+        </AppleCard>
+      </div>
     </div>
 
     <!-- 照片查看对话框 -->
@@ -255,6 +312,10 @@ export default {
       });
     });
 
+    const isMobile = computed(() => {
+      return window.innerWidth <= 768;
+    });
+
     // 加载用户数据
     const loadUsers = async () => {
       try {
@@ -332,6 +393,7 @@ export default {
     return {
       records,
       filteredRecords,
+      isMobile,
       searchQuery,
       filterType,
       filterDate,
@@ -351,6 +413,64 @@ export default {
 <style scoped>
 .records-list {
   width: 100%;
+}
+
+.records-container {
+  width: 100%;
+}
+
+.records-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.record-card {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.record-card:hover {
+  transform: translateY(-2px);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.card-time {
+  font: var(--body-emphasized);
+  color: var(--systemPrimary);
+}
+
+.card-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.card-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-user {
+  flex: 1;
+}
+
+.card-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.card-buttons .btn-icon,
+.card-buttons .btn-action {
+  padding: 6px 12px;
+  font-size: 12px;
+  border-radius: 6px;
 }
 
 .list-header {

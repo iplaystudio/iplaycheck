@@ -53,8 +53,6 @@ export const uploadImageToImgBB = async (base64Image, name = 'punch-photo') => {
       throw new Error('ImgBB上传失败: ' + (response.data?.error?.message || '未知错误'));
     }
   } catch (error) {
-    console.error('ImgBB上传错误:', error);
-    
     // 处理不同的错误类型
     if (error.response) {
       // 服务器返回错误
@@ -113,7 +111,6 @@ export const deleteImageFromImgBB = async (deleteUrl) => {
     await axios.get(deleteUrl);
     return true;
   } catch (error) {
-    console.error('ImgBB删除错误:', error);
     return false;
   }
 };

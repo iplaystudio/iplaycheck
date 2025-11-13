@@ -10,6 +10,9 @@
       </div>
     </div>
 
+    <!-- 公告区域 -->
+    <Announcements />
+
     <!-- 快捷操作 -->
     <div class="quick-actions">
       <AppleCard 
@@ -74,6 +77,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useUserStore } from '@/store/user'
 import { usePunchStore } from '@/store/punch'
 import AppleCard from '@/components/shared/AppleCard.vue'
+import Announcements from '@/components/shared/Announcements.vue'
 
 const userStore = useUserStore()
 const punchStore = usePunchStore()

@@ -27,7 +27,7 @@ export const useUserStore = defineStore('user', {
       const { data: { session }, error } = await supabase.auth.getSession();
 
       if (error) {
-        console.error('Error fetching session:', error);
+        // Error fetching session - removed console.error for production
         this.user = null;
         this.profile = null;
         this.isAuthenticated = false;
@@ -39,11 +39,11 @@ export const useUserStore = defineStore('user', {
       if (session?.user) {
         this.user = session.user;
         this.isAuthenticated = true;
-        console.log('User authenticated:', session.user);
+        // User authenticated - removed console.log for production
         await this.loadUserProfile(session.user.id);
         resolve(session.user);
       } else {
-        console.warn('No active session. Clearing user state.');
+        // No active session. Clearing user state. - removed console.warn for production
         this.user = null;
         this.profile = null;
         this.isAuthenticated = false;
@@ -51,7 +51,6 @@ export const useUserStore = defineStore('user', {
         resolve(null);
       }
     } catch (error) {
-      console.error('Error during auth initialization:', error);
       this.error = '认证状态初始化失败，请稍后重试';
       resolve(null);
     }
@@ -74,15 +73,15 @@ export const useUserStore = defineStore('user', {
 
         if (error) {
           if (error.code === 'PGRST116') { // 未找到用户资料
-            console.warn('用户资料未找到，尝试创建默认资料');
+            // 用户资料未找到，尝试创建默认资料 - removed console.warn for production
           } else {
-            console.error('Error loading user profile:', error);
+            // Error loading user profile - removed console.error for production
             throw new Error('加载用户资料失败，请稍后重试');
           }
         }
 
         if (data) {
-          console.log('Loaded user profile:', data);
+          // Loaded user profile - removed console.log for production
           this.profile = {
             ...data,
             created_at: data.created_at || new Date().toISOString()
@@ -97,7 +96,7 @@ export const useUserStore = defineStore('user', {
             .maybeSingle();
 
           if (fetchError) {
-            console.error('Error checking existing user:', fetchError);
+            // Error checking existing user - removed console.error for production
             throw new Error('检查用户资料时出错，请稍后重试');
           }
 
@@ -123,23 +122,23 @@ export const useUserStore = defineStore('user', {
 
               if (insertError) {
                 if (insertError.code === '23505') {
-                  console.warn('用户资料已存在，未重复插入');
+                  // 用户资料已存在，未重复插入 - removed console.warn for production
                 } else {
-                  console.error('Error inserting user profile:', insertError);
+                  // Error inserting user profile - removed console.error for production
                   throw new Error('创建用户资料失败，请稍后重试');
                 }
               }
             } catch (creationError) {
-              console.error('Failed to create default profile, logging out:', creationError);
+              // Failed to create default profile, logging out - removed console.error for production
               await this.logout(); // 触发退出登录逻辑
               return;
             }
           } else {
-            console.warn('用户资料已存在，未重复插入');
+            // 用户资料已存在，未重复插入 - removed console.warn for production
           }
         }
       } catch (error) {
-        console.error('Load profile error:', error);
+        // Load profile error - removed console.error for production
         this.error = error.message || '加载用户资料失败，请稍后重试';
       }
     },
@@ -163,7 +162,6 @@ export const useUserStore = defineStore('user', {
           if (error.message.includes('Invalid login credentials')) {
             throw new Error('邮箱或密码错误，请重试');
           }
-          console.error('Unexpected login error:', error);
           throw new Error('登录失败，请稍后重试');
         }
 
@@ -175,17 +173,14 @@ export const useUserStore = defineStore('user', {
             if (session?.user) {
               this.user = session.user;
               this.isAuthenticated = true;
-              console.log('User authenticated:', session.user);
               await this.loadUserProfile(session.user.id);
               resolve(session.user);
             } else {
-              console.warn('Authentication state sync failed.');
               reject(new Error('认证状态同步失败'));
             }
           });
         });
       } catch (error) {
-        console.error('Login error:', error);
         this.error = error.message || '登录失败，请稍后重试';
         throw error;
       } finally {
@@ -198,7 +193,6 @@ export const useUserStore = defineStore('user', {
       try {
         const { error } = await supabase.auth.signOut();
         if (error && error.message !== 'No user signed in') {
-          console.error('Supabase signOut error:', error);
           throw error;
         }
 
@@ -212,12 +206,9 @@ export const useUserStore = defineStore('user', {
         this.isAuthenticated = false;
         this.isAdmin = false;
 
-        console.log('User successfully logged out.');
-
         // 重新初始化认证状态以确保同步
         await this.initAuth();
       } catch (error) {
-        console.error('Logout error:', error);
         this.error = error.message || '注销失败，请稍后重试';
       }
     },
@@ -237,7 +228,6 @@ export const useUserStore = defineStore('user', {
         // 重新加载用户资料
         await this.loadUserProfile(this.userId);
       } catch (error) {
-        console.error('Update profile error:', error);
         this.error = error.message || '更新用户资料失败，请稍后重试';
         throw error;
       }

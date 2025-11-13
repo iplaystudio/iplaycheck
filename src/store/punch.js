@@ -19,6 +19,7 @@ export const usePunchStore = defineStore('punch', {
     todayRecords: [],
     loading: false,
     error: null,
+    currentTime: new Date(), // 添加当前时间状态
     stats: {
       totalRecords: 0,
       pendingSync: 0
@@ -81,14 +82,14 @@ export const usePunchStore = defineStore('punch', {
 
       // 如果还在工作中,计算到当前时间
       if (punchInTime && !state.isOnBreak) {
-        const now = new Date();
+        const now = state.currentTime;
         const duration = now - punchInTime;
         totalMinutes += Math.floor(duration / 60000) - tempBreakTotal;
       }
 
       // 如果正在休息,减去当前休息时间
       if (punchInTime && state.isOnBreak && breakStartTime) {
-        const now = new Date();
+        const now = state.currentTime;
         const duration = now - punchInTime;
         const currentBreakDuration = Math.floor((now - breakStartTime) / 60000);
         totalMinutes += Math.floor(duration / 60000) - tempBreakTotal - currentBreakDuration;
@@ -162,9 +163,6 @@ export const usePunchStore = defineStore('punch', {
         
         this.records = uniqueRecords;
 
-        // 验证从数据库加载的打卡记录是否正确
-        console.log('Loaded punch records:', this.records);
-
         // 更新今日记录
         this.updateTodayRecords();
 
@@ -174,7 +172,6 @@ export const usePunchStore = defineStore('punch', {
         // 加载统计信息
         await this.loadStats();
       } catch (error) {
-        console.error('Load records error:', error);
         this.error = error.message;
       } finally {
         this.loading = false;
@@ -271,7 +268,6 @@ export const usePunchStore = defineStore('punch', {
         this.currentRecord = record;
         return record;
       } catch (error) {
-        console.error('Create punch record error:', error);
         this.error = error.message;
         throw error;
       } finally {
@@ -328,7 +324,6 @@ export const usePunchStore = defineStore('punch', {
       try {
         this.stats = await getDBStats();
       } catch (error) {
-        console.error('Load stats error:', error);
       }
     },
 
@@ -339,7 +334,6 @@ export const usePunchStore = defineStore('punch', {
         this.records = await getRecordsByDateRange(startDate, endDate);
         return this.records;
       } catch (error) {
-        console.error('Load records by date range error:', error);
         this.error = error.message;
         throw error;
       } finally {
@@ -353,7 +347,6 @@ export const usePunchStore = defineStore('punch', {
         const records = await getUnsyncedRecords();
         return records.length;
       } catch (error) {
-        console.error('Get unsynced count error:', error);
         return 0;
       }
     },

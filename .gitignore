@@ -22,6 +22,7 @@ public/
 
 # Service Worker
 firebase-messaging-sw.js
+supabase
 
 # Environment variables
 .env

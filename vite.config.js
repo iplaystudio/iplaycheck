@@ -81,7 +81,7 @@ export default defineConfig(({ mode }) => ({
       output: {
         manualChunks: {
           'vue-vendor': ['vue', 'vue-router', 'pinia'],
-          'firebase-vendor': ['@supabase/supabase-js']
+          'supabase-vendor': ['@supabase/supabase-js']
         }
       }
     }

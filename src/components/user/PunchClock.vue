@@ -297,6 +297,8 @@ let timeInterval = null
 // 更新时间
 const updateTime = () => {
   const now = new Date()
+  
+  // 更新时钟显示
   const hours = String(now.getHours()).padStart(2, '0')
   const minutes = String(now.getMinutes()).padStart(2, '0')
   const seconds = String(now.getSeconds()).padStart(2, '0')
@@ -308,6 +310,9 @@ const updateTime = () => {
   const date = String(now.getDate()).padStart(2, '0')
   const weekday = weekdays[now.getDay()]
   currentDate.value = `${year}年${month}月${date}日 ${weekday}`
+
+  // 更新 punchStore 的当前时间以触发工作时长重新计算
+  punchStore.$patch({ currentTime: now })
 }
 
 // 工作状态
@@ -567,6 +572,12 @@ const syncListener = (event, data) => {
 }
 
 onMounted(async () => {
+  // 初始化时间显示
+  updateTime()
+  
+  // 启动定时器，每秒更新一次时间和工作时长
+  timeInterval = setInterval(updateTime, 1000)
+  
   // 设置同步监听器
   syncService.addListener(syncListener)
   

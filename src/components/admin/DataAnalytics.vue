@@ -174,11 +174,12 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, onUnmounted } from 'vue';
 import { supabase } from '@/services/supabase';
 
 const loading = ref(false);
 const usersMap = ref(new Map()); // 用户映射表
+let updateInterval = null; // 实时更新定时器
 
 const todayStats = reactive({
   uniqueUsers: 0,
@@ -399,6 +400,21 @@ const calculateUserWorkHours = (records) => {
     }
   });
   
+  // 处理当前正在工作的用户（没有对应的 out 记录）
+  const now = new Date();
+  Object.values(userWorkData).forEach(userData => {
+    if (userData.in && !userData.breakStart) {
+      // 用户正在工作
+      const workDuration = (now - userData.in) / (1000 * 60 * 60);
+      userData.total += Math.max(0, workDuration - userData.breakTotal);
+    } else if (userData.in && userData.breakStart) {
+      // 用户正在休息
+      const workDuration = (userData.breakStart - userData.in) / (1000 * 60 * 60);
+      const breakDuration = (now - userData.breakStart) / (1000 * 60 * 60);
+      userData.total += Math.max(0, workDuration - userData.breakTotal - breakDuration);
+    }
+  });
+  
   // 转换为数组并排序（工作时长从高到低），同时添加用户信息
   return Object.values(userWorkData)
     .map(user => {
@@ -516,6 +532,21 @@ const generateWeeklyTrend = (records) => {
 onMounted(async () => {
   await loadUsers();
   await loadAnalytics();
+  
+  // 启动实时更新，每30秒更新一次工作时长数据
+  updateInterval = setInterval(async () => {
+    try {
+      await loadAnalytics();
+    } catch (error) {
+      console.error('Failed to update analytics:', error);
+    }
+  }, 30000); // 30秒更新一次
+});
+
+onUnmounted(() => {
+  if (updateInterval) {
+    clearInterval(updateInterval);
+  }
 });
 </script>
 
