@@ -176,6 +176,7 @@
 <script setup>
 import { ref, reactive, onMounted, onUnmounted } from 'vue';
 import { supabase } from '@/services/supabase';
+import { getUnsyncedRecords } from '@/services/indexedDB';
 
 const loading = ref(false);
 const usersMap = ref(new Map()); // 用户映射表
@@ -234,7 +235,7 @@ const loadAnalytics = async () => {
   loading.value = true;
   
   try {
-    // 获取今日记录
+    // 获取今日记录（包括数据库和本地未同步记录）
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -244,20 +245,41 @@ const loadAnalytics = async () => {
       .gte('timestamp', today.toISOString());
 
     if (todayError) throw todayError;
+
+    // 获取本地未同步的记录
+    const unsyncedRecords = await getUnsyncedRecords();
+    const todayUnsyncedRecords = unsyncedRecords.filter(record => {
+      const recordDate = new Date(record.timestamp);
+      return recordDate >= today;
+    });
+
+    // 合并记录（去重，以本地记录为准）
+    const allTodayRecords = [...todayRecords];
+    const recordKeys = new Set(todayRecords.map(r => `${r.user_id}_${r.timestamp}_${r.type}`));
+    
+    for (const record of todayUnsyncedRecords) {
+      const key = `${record.userId}_${record.timestamp}_${record.type}`;
+      if (!recordKeys.has(key)) {
+        allTodayRecords.push({
+          ...record,
+          user_id: record.userId // 统一字段名
+        });
+      }
+    }
     
     // 只统计上班打卡的人数（去重）
-    const punchInRecords = todayRecords.filter(r => r.type === 'in');
+    const punchInRecords = allTodayRecords.filter(r => r.type === 'in');
     const uniqueUsersSet = new Set(punchInRecords.map(r => r.user_id));
     
     todayStats.uniqueUsers = uniqueUsersSet.size;
     
     // 计算今日工作时长相关数据
-    const workHoursData = calculateWorkHoursData(todayRecords);
+    const workHoursData = calculateWorkHoursData(allTodayRecords);
     todayStats.avgWorkHours = workHoursData.avgHours;
     todayStats.totalWorkHours = workHoursData.totalHours;
 
     // 计算今日各用户工作时长
-    userWorkHours.value = calculateUserWorkHours(todayRecords);
+    userWorkHours.value = calculateUserWorkHours(allTodayRecords);
 
     // 获取本周记录
     const weekAgo = new Date();
@@ -271,18 +293,38 @@ const loadAnalytics = async () => {
 
     if (weekError) throw weekError;
 
-    const activeUsersSet = new Set(weekRecords.map(r => r.user_id));
+    // 获取本周本地未同步记录
+    const weekUnsyncedRecords = unsyncedRecords.filter(record => {
+      const recordDate = new Date(record.timestamp);
+      return recordDate >= weekAgo;
+    });
+
+    // 合并本周记录
+    const allWeekRecords = [...weekRecords];
+    const weekRecordKeys = new Set(weekRecords.map(r => `${r.user_id}_${r.timestamp}_${r.type}`));
+    
+    for (const record of weekUnsyncedRecords) {
+      const key = `${record.userId}_${record.timestamp}_${record.type}`;
+      if (!weekRecordKeys.has(key)) {
+        allWeekRecords.push({
+          ...record,
+          user_id: record.userId
+        });
+      }
+    }
+
+    const activeUsersSet = new Set(allWeekRecords.map(r => r.user_id));
     weekStats.activeUsers = activeUsersSet.size;
-    weekStats.totalHours = calculateTotalHours(weekRecords);
-    weekStats.attendanceRate = calculateAttendanceRate(weekRecords, activeUsersSet.size);
+    weekStats.totalHours = calculateTotalHours(allWeekRecords);
+    weekStats.attendanceRate = calculateAttendanceRate(allWeekRecords, activeUsersSet.size);
 
     // 打卡类型分布
     const typeCounts = {};
-    weekRecords.forEach(record => {
+    allWeekRecords.forEach(record => {
       typeCounts[record.type] = (typeCounts[record.type] || 0) + 1;
     });
 
-    const total = weekRecords.length || 1;
+    const total = allWeekRecords.length || 1;
     typeDistribution.value = [
       { 
         type: 'in', 
@@ -315,7 +357,7 @@ const loadAnalytics = async () => {
     ];
 
     // 每日趋势
-    weeklyTrend.value = generateWeeklyTrend(weekRecords);
+    weeklyTrend.value = generateWeeklyTrend(allWeekRecords);
   } catch (error) {
     console.error('Load analytics error:', error);
   } finally {
@@ -404,14 +446,13 @@ const calculateUserWorkHours = (records) => {
   const now = new Date();
   Object.values(userWorkData).forEach(userData => {
     if (userData.in && !userData.breakStart) {
-      // 用户正在工作
+      // 用户正在工作（没有开始休息）
       const workDuration = (now - userData.in) / (1000 * 60 * 60);
       userData.total += Math.max(0, workDuration - userData.breakTotal);
     } else if (userData.in && userData.breakStart) {
-      // 用户正在休息
+      // 用户正在休息，只计算到开始休息为止的工作时间
       const workDuration = (userData.breakStart - userData.in) / (1000 * 60 * 60);
-      const breakDuration = (now - userData.breakStart) / (1000 * 60 * 60);
-      userData.total += Math.max(0, workDuration - userData.breakTotal - breakDuration);
+      userData.total += Math.max(0, workDuration - userData.breakTotal);
     }
   });
   
@@ -533,14 +574,14 @@ onMounted(async () => {
   await loadUsers();
   await loadAnalytics();
   
-  // 启动实时更新，每30秒更新一次工作时长数据
+  // 启动实时更新，每5秒更新一次工作时长数据（提高实时性）
   updateInterval = setInterval(async () => {
     try {
       await loadAnalytics();
     } catch (error) {
       console.error('Failed to update analytics:', error);
     }
-  }, 30000); // 30秒更新一次
+  }, 5000); // 5秒更新一次，提高实时性
 });
 
 onUnmounted(() => {
