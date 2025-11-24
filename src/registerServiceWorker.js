@@ -9,17 +9,17 @@ const updateSW = registerSW({
     }
   },
   onOfflineReady() {
-    console.log('App ready to work offline');
+    // App ready to work offline: log removed
   },
   onRegistered(registration) {
-    console.log('Service worker has been registered.');
+    // Service worker has been registered: log removed
     // 每小时检查一次更新
     setInterval(() => {
       registration?.update();
     }, 60 * 60 * 1000);
   },
   onRegisterError(error) {
-    console.error('SW registration error', error);
+    // SW registration error: debug output removed
   }
 });
 

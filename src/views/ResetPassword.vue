@@ -100,7 +100,7 @@ const handleResetPassword = async () => {
     }, 3000)
 
   } catch (err) {
-    console.error('Password reset error:', err)
+    // Password reset error: debug output removed
     error.value = err.message || '密码重置失败，请稍后重试'
   } finally {
     loading.value = false

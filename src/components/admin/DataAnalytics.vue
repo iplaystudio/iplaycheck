@@ -16,6 +16,20 @@
       </button>
     </div>
 
+    <div class="analytics-controls">
+      <div class="range-presets">
+        <button class="preset" type="button" @click.prevent="setPreset(7)">最近7天</button>
+        <button class="preset" type="button" @click.prevent="setPreset(14)">最近14天</button>
+        <button class="preset" type="button" @click.prevent="setPreset(30)">最近30天</button>
+      </div>
+      <div class="range-picker">
+        <label>起始日期</label>
+        <input type="date" v-model="startDate">
+        <label>结束日期</label>
+        <input type="date" v-model="endDate">
+        <button class="apply-range" type="button" @click.prevent="loadAnalytics" :disabled="loading">应用</button>
+      </div>
+    </div>
     <div class="analytics-grid">
       <!-- 今日统计 -->
       <div class="stat-card">
@@ -53,19 +67,19 @@
           📈
         </div>
         <div class="card-content">
-          <h3>本周统计</h3>
+          <h3>所选范围统计</h3>
           <div class="stat-items">
             <div class="stat-item">
               <span class="label">活跃用户</span>
-              <span class="value">{{ weekStats.activeUsers }}</span>
+              <span class="value">{{ rangeStats.activeUsers }}</span>
             </div>
             <div class="stat-item">
               <span class="label">总工作时长</span>
-              <span class="value">{{ weekStats.totalHours }}<small>小时</small></span>
+              <span class="value">{{ rangeStats.totalHours }}<small>小时</small></span>
             </div>
             <div class="stat-item">
               <span class="label">打卡率</span>
-              <span class="value">{{ weekStats.attendanceRate }}<small>%</small></span>
+              <span class="value">{{ rangeStats.attendanceRate }}<small>%</small></span>
             </div>
           </div>
         </div>
@@ -73,10 +87,10 @@
 
       <!-- 用户工作时长排行 -->
       <div class="chart-card full-width">
-        <h3>今日用户工作时长</h3>
+        <h3>用户工作时长排行（{{ rangeLabel }}）</h3>
         <div class="user-work-hours">
           <div
-            v-for="(user, index) in userWorkHours"
+            v-for="(user, index) in rangeUserWorkHours"
             :key="user.id"
             class="user-item"
           >
@@ -104,10 +118,10 @@
             </div>
           </div>
           <div
-            v-if="userWorkHours.length === 0"
+            v-if="rangeUserWorkHours.length === 0"
             class="empty-state"
           >
-            <span>今日暂无打卡记录</span>
+            <span>{{ rangeLabel }} 暂无打卡记录</span>
           </div>
         </div>
       </div>
@@ -142,7 +156,7 @@
 
       <!-- 工作时长趋势 -->
       <div class="chart-card full-width">
-        <h3>过去7天工作时长</h3>
+        <h3>{{ rangeLabel }} 工作时长</h3>
         <div class="trend-chart">
           <div class="chart-bars">
             <div
@@ -174,7 +188,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onUnmounted } from 'vue';
+import { ref, reactive, onMounted, onUnmounted, computed } from 'vue';
 import { supabase } from '@/services/supabase';
 import { getUnsyncedRecords } from '@/services/indexedDB';
 
@@ -188,15 +202,28 @@ const todayStats = reactive({
   totalWorkHours: 0
 });
 
-const weekStats = reactive({
+const rangeStats = reactive({
   activeUsers: 0,
   totalHours: 0,
   attendanceRate: 0
 });
 
+// date range state
+const startDate = ref('');
+const endDate = ref('');
+
+const setPreset = (days) => {
+  const e = new Date();
+  const s = new Date();
+  s.setDate(e.getDate() - (days - 1));
+  startDate.value = s.toISOString().slice(0, 10);
+  endDate.value = e.toISOString().slice(0, 10);
+};
+
 const typeDistribution = ref([]);
 const weeklyTrend = ref([]);
 const userWorkHours = ref([]);
+const rangeUserWorkHours = ref([]);
 
 const getWorkHoursColor = (hours) => {
   if (hours >= 8) return 'linear-gradient(90deg, #34c759 0%, #30b350 100%)'; // 绿色 - 正常
@@ -220,7 +247,7 @@ const loadUsers = async () => {
     });
     usersMap.value = map;
   } catch (error) {
-    console.error('Load users error:', error);
+    // Load users error: debug output removed
   }
 };
 
@@ -281,50 +308,52 @@ const loadAnalytics = async () => {
     // 计算今日各用户工作时长
     userWorkHours.value = calculateUserWorkHours(allTodayRecords);
 
-    // 获取本周记录
-    const weekAgo = new Date();
-    weekAgo.setDate(weekAgo.getDate() - 7);
-    weekAgo.setHours(0, 0, 0, 0);
+    // 获取所选范围记录
+    const start = startDate.value ? new Date(startDate.value) : (() => { const d = new Date(); d.setDate(d.getDate() - 6); return d; })();
+    const end = endDate.value ? new Date(endDate.value) : new Date();
+    start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
 
-    const { data: weekRecords, error: weekError } = await supabase
+    const { data: rangeRecords, error: rangeError } = await supabase
       .from('punch_records')
       .select('*')
-      .gte('timestamp', weekAgo.toISOString());
+      .gte('timestamp', start.toISOString())
+      .lte('timestamp', end.toISOString());
 
-    if (weekError) throw weekError;
+    if (rangeError) throw rangeError;
 
-    // 获取本周本地未同步记录
-    const weekUnsyncedRecords = unsyncedRecords.filter(record => {
+    // 获取所选范围本地未同步记录
+    const rangeUnsyncedRecords = unsyncedRecords.filter(record => {
       const recordDate = new Date(record.timestamp);
-      return recordDate >= weekAgo;
+      return recordDate >= start && recordDate <= end;
     });
 
-    // 合并本周记录
-    const allWeekRecords = [...weekRecords];
-    const weekRecordKeys = new Set(weekRecords.map(r => `${r.user_id}_${r.timestamp}_${r.type}`));
+    // 合并所选范围记录
+    const allRangeRecords = [...(rangeRecords || [])];
+    const rangeRecordKeys = new Set((rangeRecords || []).map(r => `${r.user_id}_${r.timestamp}_${r.type}`));
     
-    for (const record of weekUnsyncedRecords) {
+    for (const record of rangeUnsyncedRecords) {
       const key = `${record.userId}_${record.timestamp}_${record.type}`;
-      if (!weekRecordKeys.has(key)) {
-        allWeekRecords.push({
+      if (!rangeRecordKeys.has(key)) {
+        allRangeRecords.push({
           ...record,
           user_id: record.userId
         });
       }
     }
 
-    const activeUsersSet = new Set(allWeekRecords.map(r => r.user_id));
-    weekStats.activeUsers = activeUsersSet.size;
-    weekStats.totalHours = calculateTotalHours(allWeekRecords);
-    weekStats.attendanceRate = calculateAttendanceRate(allWeekRecords, activeUsersSet.size);
+    const activeUsersSet = new Set(allRangeRecords.map(r => r.user_id));
+    rangeStats.activeUsers = activeUsersSet.size;
+    rangeStats.totalHours = calculateTotalHours(allRangeRecords);
+    rangeStats.attendanceRate = calculateAttendanceRate(allRangeRecords, activeUsersSet.size);
 
     // 打卡类型分布
     const typeCounts = {};
-    allWeekRecords.forEach(record => {
+    allRangeRecords.forEach(record => {
       typeCounts[record.type] = (typeCounts[record.type] || 0) + 1;
     });
 
-    const total = allWeekRecords.length || 1;
+    const total = allRangeRecords.length || 1;
     typeDistribution.value = [
       { 
         type: 'in', 
@@ -357,13 +386,24 @@ const loadAnalytics = async () => {
     ];
 
     // 每日趋势
-    weeklyTrend.value = generateWeeklyTrend(allWeekRecords);
+    weeklyTrend.value = generateCustomTrend(allRangeRecords, start, end);
+
+    // 计算所选范围内各用户工作时长
+    rangeUserWorkHours.value = calculateUserWorkHours(allRangeRecords);
   } catch (error) {
-    console.error('Load analytics error:', error);
+    // Load analytics error: debug output removed
   } finally {
     loading.value = false;
   }
 };
+
+const rangeLabel = computed(() => {
+  if (!startDate.value || !endDate.value) return '选择范围';
+  if (startDate.value === endDate.value) return startDate.value;
+  const s = new Date(startDate.value).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' });
+  const e = new Date(endDate.value).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' });
+  return `${s} - ${e}`;
+});
 
 const calculateWorkHoursData = (records) => {
   if (records.length === 0) return { avgHours: 0, totalHours: 0 };
@@ -570,8 +610,60 @@ const generateWeeklyTrend = (records) => {
   return days;
 };
 
+const generateCustomTrend = (records, start, end) => {
+  const days = [];
+  let cur = new Date(start);
+  cur.setHours(0,0,0,0);
+  const last = new Date(end);
+  last.setHours(0,0,0,0);
+
+  while (cur <= last) {
+    const next = new Date(cur);
+    next.setDate(cur.getDate() + 1);
+
+    const dayRecords = records.filter(r => {
+      const recordDate = new Date(r.timestamp);
+      return recordDate >= cur && recordDate < next;
+    });
+
+    const userWorkHours = {};
+    dayRecords.forEach(record => {
+      if (!userWorkHours[record.user_id]) {
+        userWorkHours[record.user_id] = { in: null, breakStart: null, breakTotal: 0, total: 0 };
+      }
+      const userData = userWorkHours[record.user_id];
+      if (record.type === 'in') {
+        userData.in = new Date(record.timestamp);
+        userData.breakTotal = 0;
+      } else if (record.type === 'break_start') {
+        userData.breakStart = new Date(record.timestamp);
+      } else if (record.type === 'break_end' && userData.breakStart) {
+        const breakDuration = (new Date(record.timestamp) - userData.breakStart) / (1000 * 60 * 60);
+        userData.breakTotal += breakDuration;
+        userData.breakStart = null;
+      } else if (record.type === 'out' && userData.in) {
+        const workDuration = (new Date(record.timestamp) - userData.in) / (1000 * 60 * 60);
+        userData.total += Math.max(0, workDuration - userData.breakTotal);
+        userData.in = null;
+        userData.breakTotal = 0;
+      }
+    });
+
+    // finalize partials
+    const totalHours = Object.values(userWorkHours).reduce((sum, u) => sum + u.total, 0);
+
+    days.push({ date: cur.toISOString(), label: cur.toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' }), hours: Math.min(parseFloat(totalHours.toFixed(1)), 12) });
+
+    cur = next;
+  }
+
+  return days;
+};
+
 onMounted(async () => {
   await loadUsers();
+  // default to last 7 days
+  setPreset(7);
   await loadAnalytics();
   
   // 启动实时更新，每5秒更新一次工作时长数据（提高实时性）
@@ -579,7 +671,7 @@ onMounted(async () => {
     try {
       await loadAnalytics();
     } catch (error) {
-      console.error('Failed to update analytics:', error);
+      // Failed to update analytics: debug output removed
     }
   }, 5000); // 5秒更新一次，提高实时性
 });
@@ -610,6 +702,43 @@ onUnmounted(() => {
   font-weight: 700;
   color: #1d1d1f;
   letter-spacing: -0.5px;
+}
+
+.analytics-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.range-presets .preset {
+  background: var(--systemBlue);
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.range-picker {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.range-picker input[type="date"] {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.06);
+}
+
+.range-picker .apply-range {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  background: var(--systemBlue);
+  color: white;
+  cursor: pointer;
 }
 
 .refresh-btn {

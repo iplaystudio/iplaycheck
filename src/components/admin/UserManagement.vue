@@ -206,7 +206,7 @@ export default {
         if (error) throw error;
         users.value = data || [];
       } catch (error) {
-        console.error('Load users error:', error);
+        // Load users error: debug output removed
       }
     };
 
@@ -248,12 +248,12 @@ export default {
             .eq('id', editingUserId.value);
 
           if (error) {
-            console.error('Update user error:', error);
+            // Update user error: debug output removed
             throw new Error('更新用户失败，请检查输入信息');
           }
         } else {
           // 创建新用户 - 管理员操作
-          console.log('Admin creating new user:', userForm.value);
+          // Admin creating new user: debug output removed
 
           // 首先检查当前用户是否是管理员
           const currentUser = await supabase.auth.getUser();
@@ -285,7 +285,7 @@ export default {
           });
 
           if (error) {
-            console.error('Sign up error:', error);
+            // Sign up error: debug output removed
             throw new Error('创建用户失败，请检查邮箱是否已存在');
           }
 
@@ -302,7 +302,7 @@ export default {
               });
 
             if (profileError) {
-              console.error('Profile creation error:', profileError);
+              // Profile creation error: debug output removed
               // 注意：无法在客户端删除认证用户，需要手动清理
               throw new Error('用户资料创建失败，但认证账户已创建。请联系技术支持清理。');
             }
@@ -317,16 +317,16 @@ export default {
               role: 'user'
             };
           } else {
-            console.error('Sign-up succeeded but user ID is missing:', data);
+            // Sign-up succeeded but user ID is missing: debug output removed
             throw new Error('用户创建失败，请稍后重试');
           }
         }
 
-        console.log('User saved successfully');
+        // User saved successfully: debug output removed
         closeModals();
         await loadUsers();
       } catch (error) {
-        console.error('Save user error:', error);
+        // Save user error: debug output removed
         alert(error.message || '保存失败');
       }
     };
@@ -539,7 +539,7 @@ td {
   border-radius: var(--global-border-radius-medium);
   font: var(--body);
   color: var(--systemPrimary);
-  background: white;
+  background: var(--surface);
   transition: all 0.2s var(--ease-out);
 }
 
@@ -594,7 +594,7 @@ td {
   td:first-child {
     position: sticky;
     left: 0;
-    background: white;
+    background: var(--surface);
     z-index: 1;
   }
 

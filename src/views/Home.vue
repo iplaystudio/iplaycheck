@@ -123,7 +123,7 @@ const loadPendingSync = async () => {
   try {
     pendingSync.value = await punchStore.getUnsyncedCount()
   } catch (error) {
-    console.error('加载待同步数据失败:', error)
+    // 加载待同步数据失败: debug output removed
     pendingSync.value = 0
   }
 }

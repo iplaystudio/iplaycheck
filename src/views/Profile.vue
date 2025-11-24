@@ -326,15 +326,15 @@ export default {
           try {
             await supabase.auth.signOut({ scope: 'global' });
             // 退出后会自动跳转到登录页面
-          } catch (signOutError) {
-            console.error('退出登录失败:', signOutError);
+            } catch (signOutError) {
+            // 退出登录失败: debug output removed
             // 即使退出失败，也关闭模态框
             closePwdModal();
           }
         }, 1500);
         
       } catch (error) {
-        console.error('修改密码失败:', error);
+        // 修改密码失败: debug output removed
         if (error.message?.includes('Password should be at least')) {
           pwdError.value = '新密码强度不足';
         } else {
@@ -662,7 +662,7 @@ export default {
   border: 1px solid var(--systemFill);
   border-radius: var(--global-border-radius-medium);
   font: var(--body);
-  background: white;
+  background: var(--surface);
   color: var(--systemPrimary);
   transition: all 0.2s var(--ease-out);
 }

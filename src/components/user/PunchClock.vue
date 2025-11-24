@@ -439,7 +439,7 @@ const handlePunch = async () => {
     // 更新记录
     await punchStore.loadRecords(userStore.userId);
   } catch (err) {
-    console.error('Punch error:', err);
+    // Punch error: debug output removed
     error.value = '打卡失败，请稍后重试';
   } finally {
     loading.value = false;
@@ -492,7 +492,7 @@ const handlePhotoConfirmed = async (photo) => {
     // 更新记录
     await punchStore.loadRecords(userStore.userId);
   } catch (err) {
-    console.error('Punch error:', err);
+    // Punch error: debug output removed
     error.value = '打卡失败，请稍后重试';
   } finally {
     loading.value = false;
@@ -533,7 +533,7 @@ const submitPunch = async (photo, requirePhoto = true) => {
 
     currentPunchType.value = ''
   } catch (err) {
-    console.error('打卡错误:', err)
+    // 打卡错误: debug output removed
     error.value = err.message || '打卡失败,请重试'
     setTimeout(() => {
       error.value = ''
@@ -584,7 +584,7 @@ onMounted(async () => {
   try {
     await punchStore.loadRecords(userStore.userId);
   } catch (error) {
-    console.error('Failed to load punch records:', error);
+    // Failed to load punch records: debug output removed
   }
 });
 
@@ -758,7 +758,7 @@ onUnmounted(() => {
   height: 160px;
   border-radius: 50%;
   border: none;
-  background: white;
+  background: var(--surface);
   color: var(--systemPrimary);
   font: var(--body-emphasized);
   cursor: pointer;
@@ -784,7 +784,7 @@ onUnmounted(() => {
 }
 
 .punch-button.punch-out {
-  background: white;
+  background: var(--surface);
   color: var(--systemPrimary);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08),
               0 8px 32px rgba(0, 0, 0, 0.04);
