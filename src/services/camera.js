@@ -19,7 +19,7 @@ export class CameraService {
       const result = await navigator.permissions.query({ name: 'camera' });
       return result.state; // 'granted', 'denied', 'prompt'
     } catch (error) {
-      console.warn('Permission API not supported:', error);
+      // Permission API 不受支持：调试输出已移除
       return 'prompt';
     }
   }
@@ -39,7 +39,16 @@ export class CameraService {
       audio: false
     };
 
-    const finalConstraints = { ...defaultConstraints, ...constraints };
+    // Deep merge the video constraints so we don't lose width/height when passing
+    // a small constraints object like { video: { facingMode: 'environment' } }
+    const finalConstraints = {
+      ...defaultConstraints,
+      ...constraints,
+      video: {
+        ...defaultConstraints.video,
+        ...(constraints.video || {})
+      }
+    };
 
     try {
       this.stream = await navigator.mediaDevices.getUserMedia(finalConstraints);
@@ -52,7 +61,7 @@ export class CameraService {
 
       return this.stream;
     } catch (error) {
-      console.error('Error accessing camera:', error);
+      // Error accessing camera: debug output removed
       throw this.handleCameraError(error);
     }
   }
@@ -63,16 +72,51 @@ export class CameraService {
       throw new Error('No active camera stream');
     }
 
-    const currentFacingMode = this.stream
-      .getVideoTracks()[0]
-      .getSettings().facingMode;
+    const track = this.stream.getVideoTracks()[0];
+    const settings = track.getSettings();
 
-    const newFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+    // Save a reference to the current video element, because stopCamera clears it
+    const videoElement = this.videoElement;
 
-    await this.stopCamera();
-    return await this.startCamera(this.videoElement, {
-      video: { facingMode: newFacingMode }
-    });
+    // Prefer switching by deviceId (more reliable). If not available, fallback to
+    // toggling the facingMode constraint.
+    try {
+      const devices = await CameraService.getAvailableCameras();
+
+      // If more than one camera, pick the next device != current
+      if (devices.length > 1) {
+        const currentDeviceId = settings.deviceId;
+
+        let targetDevice = null;
+        if (currentDeviceId) {
+          const idx = devices.findIndex(d => d.deviceId === currentDeviceId);
+          // choose next device in list, wrap around
+          const nextIndex = idx >= 0 ? (idx + 1) % devices.length : 0;
+          targetDevice = devices[nextIndex];
+        } else {
+          // fallback: choose any other device with a different label
+          targetDevice = devices.find(d => d.label && d.label !== devices[0].label) || devices[0];
+        }
+
+        await this.stopCamera(true); // preserve video element for restart
+
+        return await this.startCamera(videoElement, {
+          video: { deviceId: { exact: targetDevice.deviceId } }
+        });
+      }
+
+      // Fallback to toggling facingMode
+      const currentFacingMode = settings.facingMode;
+      const newFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+
+      await this.stopCamera(true);
+      return await this.startCamera(videoElement, {
+        video: { facingMode: newFacingMode }
+      });
+    } catch (err) {
+      // If something fails, rethrow nicely
+      throw this.handleCameraError(err);
+    }
   }
 
   // 捕获照片
@@ -125,7 +169,10 @@ export class CameraService {
   }
 
   // 停止相机
-  stopCamera() {
+  // Stop the camera stream and optionally preserve the video element reference.
+  // When switching cameras we want to remove tracks but keep the element so we
+  // can reuse it for the new stream.
+  stopCamera(preserveVideoElement = false) {
     if (this.stream) {
       this.stream.getTracks().forEach(track => track.stop());
       this.stream = null;
@@ -133,7 +180,9 @@ export class CameraService {
 
     if (this.videoElement) {
       this.videoElement.srcObject = null;
-      this.videoElement = null;
+      if (!preserveVideoElement) {
+        this.videoElement = null;
+      }
     }
   }
 
@@ -147,7 +196,7 @@ export class CameraService {
       const devices = await navigator.mediaDevices.enumerateDevices();
       return devices.filter(device => device.kind === 'videoinput');
     } catch (error) {
-      console.error('Error enumerating devices:', error);
+      // Error enumerating devices: debug output removed
       return [];
     }
   }

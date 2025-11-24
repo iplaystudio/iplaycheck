@@ -331,7 +331,7 @@ export default {
 }
 
 .prompt-card {
-  background: var(--systemPrimary-onDark);
+  background: var(--surface);
   border-radius: var(--global-border-radius-xlarge);
   padding: 24px;
   box-shadow: var(--shadow-large);

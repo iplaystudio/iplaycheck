@@ -281,7 +281,7 @@ export default {
     };
 
     const submitAnnouncement = async () => {
-      console.log('Submitting announcement with is_active:', form.is_active);
+      // 調試信息已移除
       if (!form.title.trim() || !form.content.trim()) {
         errorMessage.value = '请填写完整的公告信息';
         showErrorToast.value = true;
@@ -381,7 +381,7 @@ export default {
       form.priority = 0;
       form.is_active = true;
       nextTick(() => {
-        console.log('Modal opened, form.is_active:', form.is_active);
+        // 調試信息已移除
       });
     };
 
@@ -482,10 +482,10 @@ export default {
 }
 
 .announcement-item {
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--defaultLine);
   border-radius: 12px;
   padding: 20px;
-  background: #fff;
+  background: var(--surface);
 }
 
 .announcement-header {

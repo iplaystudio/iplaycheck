@@ -313,7 +313,7 @@ export default {
         const dbStats = await getDBStats();
         stats.pendingSync = dbStats.pendingSync;
       } catch (error) {
-        console.error('Load stats error:', error);
+        // Load stats error: debug output removed
       } finally {
         loading.value = false;
       }
@@ -348,7 +348,7 @@ export default {
         // 5. 刷新统计数据
         await loadStats();
       } catch (error) {
-        console.error('Clear records error:', error);
+        // Clear records error: debug output removed
         errorMessage.value = '清空记录失败: ' + error.message;
         showErrorToast.value = true;
       } finally {
@@ -503,7 +503,7 @@ export default {
 }
 
 .tab-btn.active {
-  background: white;
+  background: var(--surface);
   color: var(--keyColor);
   font-weight: 600;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);

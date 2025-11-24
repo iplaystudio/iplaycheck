@@ -331,7 +331,7 @@ export default {
         });
         users.value = usersMap;
       } catch (error) {
-        console.error('Load users error:', error);
+        // Error handled silently
       }
     };
 
@@ -351,7 +351,7 @@ export default {
           synced: true
         }));
       } catch (error) {
-        console.error('Load records error:', error);
+        // Error handled silently
       }
     };
 
@@ -614,7 +614,7 @@ th {
 }
 
 .modal-content {
-  background: white;
+  background: var(--surface);
   padding: 2rem;
   border-radius: 12px;
   max-width: 600px;
@@ -672,7 +672,7 @@ th {
 }
 
 .modal-card {
-  background: white;
+  background: var(--surface);
   border-radius: 20px;
   width: 100%;
   max-width: 600px;
@@ -911,14 +911,14 @@ th {
   td:first-child {
     position: sticky;
     left: 0;
-    background: white;
+    background: var(--surface);
     z-index: 1;
   }
 
   @media (prefers-color-scheme: dark) {
     th:first-child,
     td:first-child {
-      background: #000;
+      background: var(--surface);
     }
   }
 

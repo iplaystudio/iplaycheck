@@ -117,9 +117,10 @@ export const usePunchStore = defineStore('punch', {
         }
       }
 
-      // 如果还在休息中,计算到当前时间
+      // 如果还在休息中,计算到当前时间（使用 state.currentTime 保持与 todayWorkDuration 一致）
       if (breakStartTime && state.isOnBreak) {
-        const duration = new Date() - breakStartTime;
+        const now = state.currentTime || new Date();
+        const duration = now - breakStartTime;
         totalMinutes += Math.floor(duration / 60000);
       }
 
@@ -307,6 +308,48 @@ export const usePunchStore = defineStore('punch', {
     // 打卡下班
     async punchOut(userId, options) {
       return await this.createPunchRecord('out', userId, options);
+    },
+
+    // 自动下班: 由系统在某个时间点触发
+    // 会在用户当前状态是 'working' 或 'break' 时创建一个 'out' 记录
+    async autoPunchOut(userId, options = {}) {
+      // options 保持向下兼容
+      try {
+        // 确保已加载最新今日记录
+        if (userId) {
+          await this.loadRecords(userId);
+        } else {
+          await this.loadRecords();
+        }
+        // 如果当天已经下班则跳过
+        const last = this.todayRecords[this.todayRecords.length - 1];
+        if (!last) {
+          // 没有记录: 无需自动下班
+          return null;
+        }
+        if (last.type === 'out') {
+          // 已经下班，跳过
+          return null;
+        }
+
+        // 如果当前在休息状态 (break_start), 先结束休息，然后下班
+        if (last.type === 'break_start') {
+          await this.createPunchRecord('break_end', userId, { requirePhoto: false, autoTriggered: true });
+        }
+
+        // 触发自动下班 (不需要拍照)
+        const record = await this.createPunchRecord('out', userId, {
+          requirePhoto: false,
+          autoTriggered: true,
+          ...options
+        });
+
+        return record;
+      } catch (err) {
+        // 不抛出, 让调用方自行处理日志
+        this.error = err.message;
+        return null;
+      }
     },
 
     // 开始休息

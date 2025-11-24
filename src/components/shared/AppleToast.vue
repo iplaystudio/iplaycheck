@@ -149,7 +149,7 @@ watch(() => props.visible, (newVal) => {
   gap: 12px;
   padding: 16px 20px;
   border-radius: var(--global-border-radius-large);
-  background: var(--systemPrimary-onDark);
+  background: var(--surface);
   box-shadow: var(--shadow-large);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);

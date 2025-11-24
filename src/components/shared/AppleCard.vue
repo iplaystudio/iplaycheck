@@ -45,7 +45,7 @@ const handleClick = (event) => {
 
 <style scoped>
 .apple-card {
-  background: var(--systemPrimary-onDark);
+  background: var(--surface);
   border-radius: var(--global-border-radius-large);
   padding: 20px;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);

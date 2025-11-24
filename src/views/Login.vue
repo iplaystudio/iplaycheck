@@ -38,25 +38,47 @@
           @submit.prevent="handleLogin"
         >
           <div class="input-group">
-            <label>邮箱</label>
+            <label for="login-email">邮箱</label>
             <input
+              id="login-email"
               v-model="email"
               type="email"
               placeholder="your@email.com"
               required
               autocomplete="email"
+              autofocus
             >
           </div>
 
           <div class="input-group">
-            <label>密码</label>
-            <input
-              v-model="password"
-              type="password"
-              placeholder="至少6位"
-              required
-              minlength="6"
-            >
+            <label for="login-password">密码</label>
+            <div class="input-with-icon">
+              <input
+                id="login-password"
+                v-model="password"
+                :type="showPassword ? 'text' : 'password'"
+                placeholder="至少6位"
+                required
+                minlength="6"
+              >
+              <button
+                type="button"
+                class="password-toggle password-toggle--icon"
+                @click="showPassword = !showPassword"
+                :aria-pressed="showPassword"
+                :aria-label="showPassword ? '隐藏密码' : '显示密码'"
+              >
+                <svg v-if="!showPassword" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M17.94 17.94A10.27 10.27 0 0 1 12 20c-7 0-11-8-11-8 1.73-3.2 4.21-5.72 7.06-7.06"></path>
+                  <path d="M1 1l22 22"></path>
+                  <path d="M9.88 9.88a3 3 0 0 0 4.24 4.24"></path>
+                </svg>
+              </button>
+            </div>
           </div>
 
           <div
@@ -66,12 +88,16 @@
             {{ error }}
           </div>
 
-          <button
-            class="btn btn-primary"
+          <AppleButton
+            type="submit"
+            :loading="loading"
+            variant="primary"
+            size="large"
+            fullWidth
             :disabled="loading"
           >
             登录
-          </button>
+          </AppleButton>
         </form>
       </div>
     </div>
@@ -80,13 +106,16 @@
 
 <script>
 import { ref } from 'vue';
+import AppleButton from '@/components/shared/AppleButton.vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/store/user';
 
 export default {
+  components: { AppleButton },
   setup() {
     const email = ref('');
     const password = ref('');
+    const showPassword = ref(false);
     const loading = ref(false);
     const error = ref('');
 
@@ -105,7 +134,7 @@ export default {
         await userStore.login(email.value, password.value);
         router.push('/');
       } catch (err) {
-        console.error('登录失败:', err);
+        // 登录失败 - 调试信息已移除
         error.value = err.message || '登录失败,请重试';
       } finally {
         loading.value = false;
@@ -117,6 +146,7 @@ export default {
       password,
       loading,
       error,
+      showPassword,
       handleLogin
     };
   }
@@ -187,13 +217,70 @@ export default {
 
 /* 卡片样式 */
 .login-card {
-  background: var(--system-background);
+  background: var(--surface);
   border-radius: 18px;
   padding: 44px 32px 32px;
   box-shadow: 
     0 1px 2px rgba(0, 0, 0, 0.04),
     0 8px 16px rgba(0, 0, 0, 0.08);
   animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.password-toggle {
+  padding: 6px 10px !important; /* override default small padding */
+  min-height: 28px !important;
+  font-size: 13px !important;
+}
+
+.password-toggle--icon svg {
+  display: block;
+  width: 14px;
+  height: 14px;
+  /* vertical alignment controlled by flexbox */
+}
+
+.password-toggle--icon {
+  padding: 4px !important;
+  min-width: 34px;
+  min-height: 32px; /* ensure we match AppleButton.small min height */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent !important;
+  border: none !important;
+  color: var(--systemSecondary);
+  overflow: visible; /* ensure svg not clipped */
+  line-height: 1;
+}
+
+/* place the toggle inside the input */
+.input-with-icon {
+  position: relative;
+}
+
+.input-with-icon input {
+  padding-right: 46px; /* leave space for icon */
+}
+
+.password-toggle {
+  position: absolute !important;
+  right: 8px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  padding: 6px !important;
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  border: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+}
+
+.password-toggle:focus {
+  outline: 2px solid rgba(var(--keyColor-rgb), 0.12);
 }
 
 @keyframes slideUp {
@@ -275,7 +362,7 @@ export default {
   border-radius: 10px;
   font-size: 16px;
   color: var(--label-primary);
-  background: var(--system-background);
+  background: var(--surface);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   box-sizing: border-box;
   font-family: inherit;
