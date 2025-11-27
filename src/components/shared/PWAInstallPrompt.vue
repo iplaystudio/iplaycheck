@@ -46,9 +46,10 @@ const deferredPrompt = ref(null);
 const install = async () => {
   // 检查 PWA 兼容性
   const isPWACompatible = () => {
+    // BeforeInstallPromptEvent may not be present as a global constructor in all browsers,
+    // so rely on the availability of serviceWorker and the display-mode check instead.
     return (
       'serviceWorker' in navigator &&
-      'BeforeInstallPromptEvent' in window &&
       window.matchMedia('(display-mode: standalone)').matches === false
     );
   };
@@ -115,7 +116,16 @@ onMounted(() => {
 
   // 监听 beforeinstallprompt 事件
   const handleBeforeInstallPrompt = (e) => {
-    // 收到 beforeinstallprompt 事件 - removed console.log for production
+    // 收到 beforeinstallprompt 事件 - 仅在用户未安装/未拒绝时拦截并缓存事件
+    // 防止在拦截事件后却从不调用 prompt() 导致浏览器在控制台报错
+    const alreadyInstalled = localStorage.getItem('pwa-installed') === 'true';
+    const dismissed = localStorage.getItem('pwa-install-dismissed') === 'true';
+    if (alreadyInstalled || dismissed) {
+      // 不拦截，允许浏览器默认行为（或忽略）
+      return;
+    }
+
+    // intercept the event only when we intend to show our custom prompt later
     e.preventDefault();
     deferredPrompt.value = e;
     showInstallPrompt();
