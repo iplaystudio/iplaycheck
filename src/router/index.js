@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHistory, createWebHashHistory } from 'vue-router';
 import { useUserStore } from '@/store/user';
 
 const routes = [
@@ -38,8 +38,14 @@ const routes = [
   }
 ];
 
+// Use hash history for GitHub Pages (repo pages) to avoid 404 on direct navigation,
+// otherwise use HTML5 history. If you prefer always using hash, replace logic with createWebHashHistory.
+const history = (import.meta.env.PROD && import.meta.env.BASE_URL && import.meta.env.BASE_URL !== '/')
+  ? createWebHashHistory(import.meta.env.BASE_URL)
+  : createWebHistory(import.meta.env.BASE_URL);
+
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history,
   routes
 });
 
