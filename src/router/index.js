@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHashHistory } from 'vue-router';
 import { useUserStore } from '@/store/user';
 
 const routes = [
@@ -39,7 +39,9 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  // 使用 hash 模式可以避免在静态文件托管时刷新导致的 404 问题
+  // 如果你更希望使用 history 模式，请确保生产环境的服务器将所有路由回退到 index.html
+  history: createWebHashHistory(import.meta.env.BASE_URL),
   routes
 });
 
