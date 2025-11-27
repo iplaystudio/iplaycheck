@@ -125,6 +125,7 @@
               />
               <path
                 d="M20 8 L20 20 L28 20"
+                fill="none"
                 stroke="currentColor"
                 stroke-width="2.5"
                 stroke-linecap="round"

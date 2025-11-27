@@ -208,9 +208,10 @@ const rangeStats = reactive({
   attendanceRate: 0
 });
 
-// date range state
-const startDate = ref('');
-const endDate = ref('');
+// date range state - default to today
+const todayStr = new Date().toISOString().slice(0, 10);
+const startDate = ref(todayStr);
+const endDate = ref(todayStr);
 
 const setPreset = (days) => {
   const e = new Date();
@@ -662,8 +663,8 @@ const generateCustomTrend = (records, start, end) => {
 
 onMounted(async () => {
   await loadUsers();
-  // default to last 7 days
-  setPreset(7);
+  // default to today (startDate/endDate already initialized to today)
+  // startDate and endDate are set to today's date above, so just load analytics
   await loadAnalytics();
   
   // 启动实时更新，每5秒更新一次工作时长数据（提高实时性）
@@ -1197,6 +1198,39 @@ onUnmounted(() => {
 
   .bar-fill {
     max-width: 32px;
+  }
+}
+
+/* 更小屏幕适配：让控件堆叠、输入拉伸、预设按钮换行 */
+@media (max-width: 480px) {
+  .analytics-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .range-presets {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .range-picker {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .range-picker label {
+    font-size: 13px;
+  }
+
+  .range-picker input[type="date"],
+  .range-picker .apply-range {
+    width: 100%;
+  }
+
+  .range-picker {
+    gap: 8px;
   }
 }
 
