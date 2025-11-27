@@ -125,12 +125,12 @@ export default {
 
     const webIconSrc = ref(null);
 
-    // Directly use the user's image in public/icon.jpg, but respect Vite base in production
+    // Directly use the user's image in public/icon.png, but respect Vite base in production
     const loadWebIcon = () => {
       const base = import.meta.env.BASE_URL || '/'
       // remove trailing slash then add one to ensure single slash
       const normalizedBase = base.replace(/\/$/, '')
-      webIconSrc.value = `${normalizedBase}/icon.jpg`
+      webIconSrc.value = `${normalizedBase}/icon.png`
     }
 
     loadWebIcon();

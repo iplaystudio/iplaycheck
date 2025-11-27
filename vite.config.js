@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => ({
     vue(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icon.jpg', 'manifest.json'],
+      includeAssets: ['icon.png', 'manifest.json'],
       manifest: false,
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,json,vue,txt,woff2}'],
