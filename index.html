@@ -13,10 +13,10 @@
     <meta name="apple-mobile-web-app-title" content="工作室打卡">
     <meta name="description" content="工作室打卡">
     
-    <!-- Icons -->
-    <link rel="icon" type="image/jpg" href="/icon.jpg">
-    <link rel="manifest" href="/manifest.json">
-    <link rel="apple-touch-icon" href="/icon.jpg">
+    <!-- Icons (use relative paths so manifest/icon resolve correctly under a GitHub Pages subpath) -->
+    <link rel="icon" type="image/jpg" href="./icon.jpg">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="./icon.jpg">
 
     <title>工作室打卡</title>
   </head>
@@ -25,6 +25,6 @@
       <strong>很抱歉,本应用需要JavaScript支持才能正常运行。请启用JavaScript后重试。</strong>
     </noscript>
     <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
+    <script type="module" src="./src/main.js"></script>
   </body>
 </html>
