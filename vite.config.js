@@ -10,7 +10,8 @@ export default defineConfig(({ mode }) => ({
     vue(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icon.png', 'manifest.json'],
+      // 只包含优化后的小图标，避免把大图标（icon.png ~3MB）加入 precache
+      includeAssets: ['icon-192.png', 'icon-512.png', 'manifest.json'],
       manifest: false,
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,json,vue,txt,woff2}'],
