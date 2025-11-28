@@ -130,7 +130,7 @@ export default {
       const base = import.meta.env.BASE_URL || '/'
       // remove trailing slash then add one to ensure single slash
       const normalizedBase = base.replace(/\/$/, '')
-      webIconSrc.value = `${normalizedBase}/icon.png`
+      webIconSrc.value = `${normalizedBase}/icon-512.png`
     }
 
     loadWebIcon();
