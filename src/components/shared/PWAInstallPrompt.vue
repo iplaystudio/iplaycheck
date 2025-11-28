@@ -41,7 +41,7 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 
 const showPrompt = ref(false);
-const deferredPrompt = ref(null);
+const deferredPrompt = ref(window.__deferredPWAInstallPrompt || null);
 
 const install = async () => {
   // 检查 PWA 兼容性
@@ -126,7 +126,14 @@ onMounted(() => {
     }
 
     // intercept the event only when we intend to show our custom prompt later
-    e.preventDefault();
+    try {
+      e.preventDefault();
+    } catch (err) {
+      // 某些环境可能不允许 preventDefault，忽略错误
+    }
+
+    // 将事件保存到全局，防止组件挂载时丢失
+    window.__deferredPWAInstallPrompt = e;
     deferredPrompt.value = e;
     showInstallPrompt();
   };
