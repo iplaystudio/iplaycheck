@@ -47,19 +47,31 @@ const deferredPrompt = ref(null);
 
 const syncDeferredPrompt = () => {
   if (window.__deferredPWAInstallPrompt && deferredPrompt.value !== window.__deferredPWAInstallPrompt) {
+    console.log('syncing deferredPrompt from global');
     deferredPrompt.value = window.__deferredPWAInstallPrompt;
   }
 };
 
 const install = async () => {
+  console.log('install clicked, deferredPrompt:', deferredPrompt.value);
   if (deferredPrompt.value) {
-    deferredPrompt.value.prompt();
-    const { outcome } = await deferredPrompt.value.userChoice;
-    deferredPrompt.value = null;
-    window.__deferredPWAInstallPrompt = null;
-    showPrompt.value = false;
-    if (outcome === 'accepted') {
-      localStorage.setItem('pwa-installed', 'true');
+    try {
+      console.log('calling prompt()');
+      await deferredPrompt.value.prompt();
+      console.log('prompt() called, waiting for userChoice');
+      const { outcome } = await deferredPrompt.value.userChoice;
+      console.log('userChoice outcome:', outcome);
+      deferredPrompt.value = null;
+      window.__deferredPWAInstallPrompt = null;
+      showPrompt.value = false;
+      if (outcome === 'accepted') {
+        localStorage.setItem('pwa-installed', 'true');
+      }
+    } catch (error) {
+      console.error('PWA install prompt failed:', error);
+      alert('安装失败，请尝试刷新页面或使用其他浏览器。错误：' + error.message);
+      showPrompt.value = false;
+      localStorage.setItem('pwa-install-dismissed', 'true');
     }
   } else if (import.meta.env.DEV) {
     alert('在开发环境中，无法实际安装PWA应用。但在生产环境中，用户会看到浏览器的安装提示。');
@@ -94,11 +106,13 @@ onMounted(() => {
   }, 3000);
 
   const handleBeforeInstallPrompt = (e) => {
+    console.log('beforeinstallprompt event fired');
     const alreadyInstalled = localStorage.getItem('pwa-installed') === 'true';
     const dismissed = localStorage.getItem('pwa-install-dismissed') === 'true';
     if (alreadyInstalled || dismissed) return;
     window.__deferredPWAInstallPrompt = e;
     deferredPrompt.value = e;
+    console.log('deferredPrompt set:', e);
     showInstallPrompt();
   };
 
