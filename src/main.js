@@ -10,8 +10,10 @@ const app = createApp(App);
 
 // 捕获 beforeinstallprompt 事件尽早注册，以防事件在组件挂载前触发导致丢失
 window.addEventListener('beforeinstallprompt', (e) => {
-	// 不在这里调用 preventDefault()，避免在页面没有及时调用 prompt() 时被浏览器报告
-	// 将事件保存到全局，组件在准备好展示并响应用户交互时负责调用 e.preventDefault() 和 e.prompt()
+	// 始终 preventDefault，防止浏览器自动弹窗，便于自定义弹窗控制
+	try {
+		e.preventDefault();
+	} catch (err) {}
 	window.__deferredPWAInstallPrompt = e;
 });
 
