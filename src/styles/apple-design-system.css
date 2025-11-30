@@ -259,6 +259,8 @@ img {
   max-width: 100%;
   height: auto;
   display: block;
+  border-radius: var(--global-border-radius-large, 16px);
+  /* 兼容性考虑，默认 16px 圆角 */
 }
 
 /* ===== 卡片样式 ===== */
