@@ -95,6 +95,11 @@ const actions = computed(() => {
       to: '/punch',
       title: '工作室打卡',
       description: '上班打卡、下班打卡'
+    },
+    {
+      to: '/submit-progress',
+      title: '提交进度',
+      description: '提交文字或图片进度'
     }
   ]
 

@@ -140,6 +140,7 @@
 
     <AppleCard class="dashboard-content">
       <RecordsList v-if="activeTab === 'records'" />
+      <ProgressSubmissions v-if="activeTab === 'submissions'" />
       <UserManagement v-if="activeTab === 'users'" />
       <AnnouncementsManagement v-if="activeTab === 'announcements'" />
       <DataAnalytics v-if="activeTab === 'analytics'" />
@@ -232,6 +233,7 @@ import RecordsList from './RecordsList.vue';
 import UserManagement from './UserManagement.vue';
 import AnnouncementsManagement from './AnnouncementsManagement.vue';
 import DataAnalytics from './DataAnalytics.vue';
+import ProgressSubmissions from './ProgressSubmissions.vue';
 
 export default {
   name: 'AdminDashboard',
@@ -242,6 +244,7 @@ export default {
     AppleLoading,
     AppleToast,
     RecordsList,
+      ProgressSubmissions,
     UserManagement,
     AnnouncementsManagement,
     DataAnalytics
@@ -258,6 +261,7 @@ export default {
 
     const tabs = [
       { id: 'records', label: '打卡记录' },
+      { id: 'submissions', label: '提交进度' },
       { id: 'users', label: '用户管理' },
       { id: 'announcements', label: '公告管理' },
       { id: 'analytics', label: '数据分析' }
