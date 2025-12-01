@@ -4,23 +4,60 @@ import { VitePWA } from 'vite-plugin-pwa'
 import { fileURLToPath, URL } from 'node:url'
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
-  base: mode === 'production' ? '/iplaycheck/' : '/',
-  plugins: [
-    vue(),
-    VitePWA({
-      registerType: 'autoUpdate',
-      includeAssets: ['icon-192.png', 'icon-512.png', 'icon.png', 'manifest.json'],
-      manifest: false,
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,json,vue,txt,woff2}'],
-        // Allow larger assets to be precached if necessary (default is 2 MB in workbox)
-        // Increase only if you understand the trade-off of precaching large files.
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
-        // 关键：确保 SPA 导航回退到 index.html
-        navigateFallback: '/iplaycheck/index.html',
-        navigateFallbackDenylist: [/^\/api/, /\/manifest\.json$/],
-        runtimeCaching: [
+export default defineConfig(({ mode }) => {
+  const baseUrl = mode === 'production' ? '/iplaycheck/' : '/';
+  return {
+    base: baseUrl,
+    plugins: [
+      vue(),
+      VitePWA({
+        registerType: 'autoUpdate',
+        includeAssets: ['icon-192.png', 'icon-512.png', 'icon.png'],
+        manifest: {
+          id: '/iplaycheck/',
+          name: '工作室打卡',
+          short_name: '打卡',
+          description: '工作室员工打卡系统，支持离线使用',
+          theme_color: '#007aff',
+          background_color: '#f2f2f7',
+          display: 'standalone',
+          orientation: 'portrait',
+          scope: baseUrl,
+          start_url: `${baseUrl}index.html`,
+          icons: [
+            {
+              src: 'icon-192.png',
+              sizes: '192x192',
+              type: 'image/png',
+              purpose: 'any maskable'
+            },
+            {
+              src: 'icon-512.png',
+              sizes: '512x512',
+              type: 'image/png',
+              purpose: 'any maskable'
+            },
+            {
+              src: 'icon.png',
+              sizes: '256x256',
+              type: 'image/png',
+              purpose: 'any'
+            }
+          ],
+          categories: ["productivity", "business"],
+          prefer_related_applications: false,
+          lang: "zh-CN",
+          dir: "ltr"
+        },
+        workbox: {
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,json,vue,txt,woff2}'],
+          // Allow larger assets to be precached if necessary (default is 2 MB in workbox)
+          // Increase only if you understand the trade-off of precaching large files.
+          maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
+          // 关键：确保 SPA 导航回退到 index.html
+          navigateFallback: `${baseUrl}index.html`,
+          navigateFallbackDenylist: [/^\/api/, /\/manifest\.webmanifest$/],
+          runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'CacheFirst',
@@ -92,4 +129,4 @@ export default defineConfig(({ mode }) => ({
       }
     }
   }
-}))
+})
