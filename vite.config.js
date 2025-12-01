@@ -14,7 +14,7 @@ export default defineConfig(({ mode }) => {
         registerType: 'autoUpdate',
         includeAssets: ['icon-192.png', 'icon-512.png', 'icon.png'],
         manifest: {
-          id: '/iplaycheck/',
+          id: baseUrl,
           name: '工作室打卡',
           short_name: '打卡',
           description: '工作室员工打卡系统，支持离线使用',
