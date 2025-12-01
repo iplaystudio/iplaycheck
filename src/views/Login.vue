@@ -5,8 +5,13 @@
         <!-- Logo 区域 -->
         <div class="login-logo">
           <div class="logo-icon">
-            <img v-if="webIconSrc" :src="webIconSrc" alt="打卡" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block;" />
-            <div v-else style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.9);">📱</div>
+            <img 
+              v-if="webIconSrc" 
+              :src="webIconSrc" 
+              alt="打卡" 
+              :class="['logo-image', { 'logo-loaded': iconLoaded }]"
+            />
+            <div v-else class="logo-placeholder">📱</div>
           </div>
           <h1>打卡</h1>
           <p class="subtitle">
@@ -124,13 +129,20 @@ export default {
     };
 
     const webIconSrc = ref(null);
+    const iconLoaded = ref(false);
 
-    // Directly use the user's image in public/icon.png, but respect Vite base in production
     const loadWebIcon = () => {
       const base = import.meta.env.BASE_URL || '/'
-      // remove trailing slash then add one to ensure single slash
       const normalizedBase = base.replace(/\/$/, '')
-      webIconSrc.value = `${normalizedBase}/icon-512.png`
+      const iconUrl = `${normalizedBase}/icon-192.png`
+      
+      // 预加载图片
+      const img = new Image()
+      img.onload = () => {
+        webIconSrc.value = iconUrl
+        iconLoaded.value = true
+      }
+      img.src = iconUrl
     }
 
     loadWebIcon();
@@ -143,6 +155,7 @@ export default {
       showPassword,
       handleLogin,
       webIconSrc,
+      iconLoaded,
     };
   }
 };
@@ -316,6 +329,30 @@ export default {
 .logo-icon svg {
   width: 36px;
   height: 36px;
+}
+
+.logo-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.logo-image.logo-loaded {
+  opacity: 1;
+}
+
+.logo-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 32px;
 }
 
 .login-logo h1 {
