@@ -25,6 +25,12 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/submit-progress',
+    name: 'SubmitProgress',
+    component: () => import('@/views/SubmitProgress.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/admin',
     name: 'Admin',
     component: () => import('@/views/AdminView.vue'),
