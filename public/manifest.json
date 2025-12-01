@@ -8,22 +8,22 @@
   "display": "standalone",
   "orientation": "portrait",
   "scope": "/iplaycheck/",
-  "start_url": "/iplaycheck/index.html",
+  "start_url": "./index.html",
   "icons": [
     {
-      "src": "/iplaycheck/icon-192.png",
+      "src": "icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/iplaycheck/icon-512.png",
+      "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/iplaycheck/icon.png",
+      "src": "icon.png",
       "sizes": "256x256",
       "type": "image/png",
       "purpose": "any"
