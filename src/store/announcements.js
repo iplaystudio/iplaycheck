@@ -7,13 +7,13 @@ import { supabase } from '@/services/supabase';
 const getIconPath = () => {
   // 检查是否在浏览器环境中
   if (typeof window === 'undefined') {
-    return '/icon.jpg'; // 服务端默认路径
+    return '/icon.png'; // 服务端默认路径
   }
 
-  // 生产环境使用 /iplaycheck/icon.jpg，开发环境使用 /icon.jpg
+  // 生产环境使用 /iplaycheck/icon.png，开发环境使用 /icon.png
   const isProduction = window.location.hostname !== 'localhost' &&
     window.location.hostname !== '127.0.0.1';
-  return isProduction ? '/iplaycheck/icon.jpg' : '/icon.jpg';
+  return isProduction ? '/iplaycheck/icon.png' : '/icon.png';
 };
 
 export const useAnnouncementsStore = defineStore('announcements', {

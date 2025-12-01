@@ -3,10 +3,14 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <!-- Keep viewport responsive but allow user zoom for accessibility -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <!-- PWA Meta Tags -->
+    <!-- Keep theme-color for browsers that support it (Chrome/Edge/Android). Firefox may not use this meta tag. -->
     <meta name="theme-color" content="#007aff">
+    <!-- Optional: tile color for Windows/IE/Edge legacy -->
+    <meta name="msapplication-TileColor" content="#007aff">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -14,9 +18,11 @@
     <meta name="description" content="工作室打卡">
     
     <!-- Icons -->
-    <link rel="icon" type="image/jpg" href="/icon.jpg">
-    <link rel="manifest" href="/manifest.json">
-    <link rel="apple-touch-icon" href="/icon.jpg">
+    <link rel="icon" type="image/png" href="icon.png">
+    <!-- Apple touch icons for iOS homescreen (Safari uses these) -->
+    <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+    <link rel="apple-touch-icon" sizes="256x256" href="icon.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
 
     <title>工作室打卡</title>
   </head>
@@ -25,6 +31,6 @@
       <strong>很抱歉,本应用需要JavaScript支持才能正常运行。请启用JavaScript后重试。</strong>
     </noscript>
     <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
+    <script type="module" src="./src/main.js"></script>
   </body>
 </html>

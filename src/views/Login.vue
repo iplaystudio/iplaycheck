@@ -5,26 +5,13 @@
         <!-- Logo 区域 -->
         <div class="login-logo">
           <div class="logo-icon">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                stroke-width="2"
-                fill="none"
-              />
-              <path
-                d="M12 6v6l4 2"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-              />
-            </svg>
+            <img 
+              v-if="webIconSrc" 
+              :src="webIconSrc" 
+              alt="打卡" 
+              :class="['logo-image', { 'logo-loaded': iconLoaded }]"
+            />
+            <div v-else class="logo-placeholder">📱</div>
           </div>
           <h1>打卡</h1>
           <p class="subtitle">
@@ -141,13 +128,34 @@ export default {
       }
     };
 
+    const webIconSrc = ref(null);
+    const iconLoaded = ref(false);
+
+    const loadWebIcon = () => {
+      const base = import.meta.env.BASE_URL || '/'
+      const normalizedBase = base.replace(/\/$/, '')
+      const iconUrl = `${normalizedBase}/icon-192.png`
+      
+      // 预加载图片
+      const img = new Image()
+      img.onload = () => {
+        webIconSrc.value = iconUrl
+        iconLoaded.value = true
+      }
+      img.src = iconUrl
+    }
+
+    loadWebIcon();
+
     return {
       email,
       password,
       loading,
       error,
       showPassword,
-      handleLogin
+      handleLogin,
+      webIconSrc,
+      iconLoaded,
     };
   }
 };
@@ -296,8 +304,11 @@ export default {
 
 /* Logo 区域 */
 .login-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
   text-align: center;
-  margin-bottom: 32px;
 }
 
 .logo-icon {
@@ -318,6 +329,30 @@ export default {
 .logo-icon svg {
   width: 36px;
   height: 36px;
+}
+
+.logo-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.logo-image.logo-loaded {
+  opacity: 1;
+}
+
+.logo-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 32px;
 }
 
 .login-logo h1 {
