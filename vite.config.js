@@ -17,6 +17,9 @@ export default defineConfig(({ mode }) => ({
         // Allow larger assets to be precached if necessary (default is 2 MB in workbox)
         // Increase only if you understand the trade-off of precaching large files.
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
+        // 关键：确保 SPA 导航回退到 index.html
+        navigateFallback: '/iplaycheck/index.html',
+        navigateFallbackDenylist: [/^\/api/, /\/manifest\.json$/],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
