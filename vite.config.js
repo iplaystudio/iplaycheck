@@ -5,7 +5,13 @@ import { fileURLToPath, URL } from 'node:url'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-  const baseUrl = mode === 'production' ? '/iplaycheck/' : '/';
+  const isProd = mode === 'production';
+  const baseUrl = isProd ? '/iplaycheck/' : '/';
+  const productionOrigin = 'https://restarhalf.github.io';
+  const absoluteBaseUrl = isProd ? new URL(baseUrl, productionOrigin).toString() : baseUrl;
+  const resolveIconPath = (filename) => {
+    return isProd ? new URL(filename, absoluteBaseUrl).toString() : `${baseUrl}${filename}`;
+  };
   return {
     base: baseUrl,
     plugins: [
@@ -14,7 +20,7 @@ export default defineConfig(({ mode }) => {
         registerType: 'autoUpdate',
         includeAssets: ['icon-192.png', 'icon-512.png', 'icon.png'],
         manifest: {
-          id: baseUrl,
+          id: absoluteBaseUrl,
           name: '工作室打卡',
           short_name: '打卡',
           description: '工作室员工打卡系统，支持离线使用',
@@ -22,35 +28,35 @@ export default defineConfig(({ mode }) => {
           background_color: '#f2f2f7',
           display: 'standalone',
           orientation: 'portrait',
-          scope: baseUrl,
-          start_url: baseUrl,
+          scope: absoluteBaseUrl,
+          start_url: absoluteBaseUrl,
           icons: [
             {
-              src: `${baseUrl}icon-192.png`,
+              src: resolveIconPath('icon-192.png'),
               sizes: '192x192',
               type: 'image/png',
               purpose: 'any'
             },
             {
-              src: `${baseUrl}icon-192.png`,
+              src: resolveIconPath('icon-192.png'),
               sizes: '192x192',
               type: 'image/png',
               purpose: 'maskable'
             },
             {
-              src: `${baseUrl}icon-512.png`,
+              src: resolveIconPath('icon-512.png'),
               sizes: '512x512',
               type: 'image/png',
               purpose: 'any'
             },
             {
-              src: `${baseUrl}icon-512.png`,
+              src: resolveIconPath('icon-512.png'),
               sizes: '512x512',
               type: 'image/png',
               purpose: 'maskable'
             },
             {
-              src: `${baseUrl}icon.png`,
+              src: resolveIconPath('icon.png'),
               sizes: '256x256',
               type: 'image/png',
               purpose: 'any'
