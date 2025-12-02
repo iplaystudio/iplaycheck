@@ -60,6 +60,12 @@ export default defineConfig(({ mode }) => {
               sizes: '256x256',
               type: 'image/png',
               purpose: 'any'
+            },
+            {
+              src: resolveIconPath('icon.png'),
+              sizes: '256x256',
+              type: 'image/png',
+              purpose: 'maskable'
             }
           ],
           categories: ["productivity", "business"],
