@@ -21,6 +21,7 @@ export default defineConfig(({ mode }) => {
       vue(),
       VitePWA({
         registerType: 'autoUpdate',
+        filename: 'manifest.json',
         includeAssets: ['icon-192.png', 'icon-512.png', 'icon.png'],
         manifest: {
           id: manifestId,
@@ -83,7 +84,7 @@ export default defineConfig(({ mode }) => {
           maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
           // 关键：确保 SPA 导航回退到 index.html
           navigateFallback: `${baseUrl}index.html`,
-          navigateFallbackDenylist: [/^\/api/, /\/manifest\.webmanifest$/],
+          navigateFallbackDenylist: [/^\/api/, /\/manifest\.json$/, /\/manifest\.webmanifest$/],
           runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -130,7 +131,8 @@ export default defineConfig(({ mode }) => {
         ]
       },
       devOptions: {
-        enabled: false  // 禁用开发模式下的 PWA
+        enabled: true,
+        type: 'module',
       }
     })
   ],
