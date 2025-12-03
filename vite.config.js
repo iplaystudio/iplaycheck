@@ -42,26 +42,8 @@ export default defineConfig(({ mode }) => {
               purpose: 'any'
             },
             {
-              src: resolveIconPath('icon-192.png'),
-              sizes: '192x192',
-              type: 'image/png',
-              purpose: 'maskable'
-            },
-            {
               src: resolveIconPath('icon-512.png'),
               sizes: '512x512',
-              type: 'image/png',
-              purpose: 'any'
-            },
-            {
-              src: resolveIconPath('icon-512.png'),
-              sizes: '512x512',
-              type: 'image/png',
-              purpose: 'maskable'
-            },
-            {
-              src: resolveIconPath('icon.png'),
-              sizes: '256x256',
               type: 'image/png',
               purpose: 'any'
             },
@@ -69,7 +51,7 @@ export default defineConfig(({ mode }) => {
               src: resolveIconPath('icon.png'),
               sizes: '256x256',
               type: 'image/png',
-              purpose: 'maskable'
+              purpose: 'any'
             }
           ],
           categories: ["productivity", "business"],
