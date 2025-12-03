@@ -5,16 +5,26 @@ import { fileURLToPath, URL } from 'node:url'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-  const baseUrl = mode === 'production' ? '/iplaycheck/' : '/';
+  const isProd = mode === 'production';
+  const baseUrl = isProd ? '/iplaycheck/' : '/';
+  const productionOrigin = 'https://restarhalf.github.io';
+  const absoluteBaseUrl = isProd ? new URL(baseUrl, productionOrigin).toString() : baseUrl;
+  const resolveIconPath = (filename) => {
+    return isProd ? new URL(filename, absoluteBaseUrl).toString() : `${baseUrl}${filename}`;
+  };
+  const manifestScope = baseUrl;
+  const manifestId = baseUrl;
+  const manifestStartUrl = baseUrl;
   return {
     base: baseUrl,
     plugins: [
       vue(),
       VitePWA({
         registerType: 'autoUpdate',
+        filename: 'manifest.json',
         includeAssets: ['icon-192.png', 'icon-512.png', 'icon.png'],
         manifest: {
-          id: baseUrl,
+          id: manifestId,
           name: '工作室打卡',
           short_name: '打卡',
           description: '工作室员工打卡系统，支持离线使用',
@@ -22,23 +32,23 @@ export default defineConfig(({ mode }) => {
           background_color: '#f2f2f7',
           display: 'standalone',
           orientation: 'portrait',
-          scope: baseUrl,
-          start_url: `${baseUrl}index.html`,
+          scope: manifestScope,
+          start_url: manifestStartUrl,
           icons: [
             {
-              src: 'icon-192.png',
+              src: resolveIconPath('icon-192.png'),
               sizes: '192x192',
               type: 'image/png',
-              purpose: 'any maskable'
+              purpose: 'any'
             },
             {
-              src: 'icon-512.png',
+              src: resolveIconPath('icon-512.png'),
               sizes: '512x512',
               type: 'image/png',
-              purpose: 'any maskable'
+              purpose: 'any'
             },
             {
-              src: 'icon.png',
+              src: resolveIconPath('icon.png'),
               sizes: '256x256',
               type: 'image/png',
               purpose: 'any'
@@ -56,7 +66,7 @@ export default defineConfig(({ mode }) => {
           maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
           // 关键：确保 SPA 导航回退到 index.html
           navigateFallback: `${baseUrl}index.html`,
-          navigateFallbackDenylist: [/^\/api/, /\/manifest\.webmanifest$/],
+          navigateFallbackDenylist: [/^\/api/, /\/manifest\.json$/, /\/manifest\.webmanifest$/],
           runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -103,7 +113,8 @@ export default defineConfig(({ mode }) => {
         ]
       },
       devOptions: {
-        enabled: false  // 禁用开发模式下的 PWA
+        enabled: true,
+        type: 'module',
       }
     })
   ],
