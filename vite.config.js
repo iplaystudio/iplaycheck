@@ -12,6 +12,9 @@ export default defineConfig(({ mode }) => {
   const resolveIconPath = (filename) => {
     return isProd ? new URL(filename, absoluteBaseUrl).toString() : `${baseUrl}${filename}`;
   };
+  const manifestScope = baseUrl;
+  const manifestId = baseUrl;
+  const manifestStartUrl = baseUrl;
   return {
     base: baseUrl,
     plugins: [
@@ -20,7 +23,7 @@ export default defineConfig(({ mode }) => {
         registerType: 'autoUpdate',
         includeAssets: ['icon-192.png', 'icon-512.png', 'icon.png'],
         manifest: {
-          id: absoluteBaseUrl,
+          id: manifestId,
           name: '工作室打卡',
           short_name: '打卡',
           description: '工作室员工打卡系统，支持离线使用',
@@ -28,8 +31,8 @@ export default defineConfig(({ mode }) => {
           background_color: '#f2f2f7',
           display: 'standalone',
           orientation: 'portrait',
-          scope: absoluteBaseUrl,
-          start_url: absoluteBaseUrl,
+          scope: manifestScope,
+          start_url: manifestStartUrl,
           icons: [
             {
               src: resolveIconPath('icon-192.png'),
