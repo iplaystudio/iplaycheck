@@ -6,11 +6,19 @@ import { fileURLToPath, URL } from 'node:url'
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   const isProd = mode === 'production';
-  const baseUrl = isProd ? '/iplaycheck/' : '/';
-  const productionOrigin = 'https://restarhalf.github.io';
-  const absoluteBaseUrl = isProd ? new URL(baseUrl, productionOrigin).toString() : baseUrl;
+  // 在 Capacitor (原生打包) 环境下，使用根路径，避免离线包找不到 /iplaycheck/ 前缀的静态资源
+  const isCapacitor = !!process.env.CAPACITOR_PLATFORM;
+  const baseUrl = isProd ? (isCapacitor ? '/' : '/iplaycheck/') : '/';
+  const productionOrigin = 'https://iplaystudio.github.io';
+  const absoluteBaseUrl = isProd && !isCapacitor
+    ? new URL(baseUrl, productionOrigin).toString()
+    : baseUrl;
   const resolveIconPath = (filename) => {
-    return isProd ? new URL(filename, absoluteBaseUrl).toString() : `${baseUrl}${filename}`;
+    // absoluteBaseUrl 可能是 '/'（Capacitor），这种情况下直接拼接，避免 new URL 报 Invalid URL
+    const isAbsolute = absoluteBaseUrl.startsWith('http');
+    return isAbsolute
+      ? new URL(filename, absoluteBaseUrl).toString()
+      : `${absoluteBaseUrl}${filename}`;
   };
   const manifestScope = baseUrl;
   const manifestId = baseUrl;

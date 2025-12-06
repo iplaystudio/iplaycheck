@@ -7,7 +7,10 @@
           <p>请输入您的新密码</p>
         </div>
 
-        <form @submit.prevent="handleResetPassword" class="reset-form">
+        <form
+          class="reset-form"
+          @submit.prevent="handleResetPassword"
+        >
           <div class="form-group">
             <label for="password">新密码</label>
             <input
@@ -44,11 +47,17 @@
           </AppleButton>
         </form>
 
-        <div v-if="error" class="error-message">
+        <div
+          v-if="error"
+          class="error-message"
+        >
           {{ error }}
         </div>
 
-        <div v-if="success" class="success-message">
+        <div
+          v-if="success"
+          class="success-message"
+        >
           {{ success }}
         </div>
       </AppleCard>

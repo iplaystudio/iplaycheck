@@ -6,10 +6,17 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:android": "set CAPACITOR_PLATFORM=android&& vite build",
     "preview": "vite preview",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix"
   },
   "dependencies": {
+    "@capacitor/android": "^7.4.4",
+    "@capacitor/app": "^7.1.0",
+    "@capacitor/cli": "^7.4.4",
+    "@capacitor/core": "^7.4.4",
+    "@capacitor/local-notifications": "^7.0.0",
+    "@capacitor/preferences": "^7.0.2",
     "@supabase/supabase-js": "^2.80.0",
     "axios": "^1.5.0",
     "idb": "^7.1.1",
@@ -23,6 +30,7 @@
     "@vue/eslint-config-prettier": "^10.2.0",
     "eslint": "^9.39.1",
     "eslint-plugin-vue": "^10.5.1",
+    "typescript": "^5.9.3",
     "vite": "^4.5.0",
     "vite-plugin-pwa": "^0.17.0",
     "workbox-window": "^7.0.0"

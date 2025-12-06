@@ -8,12 +8,18 @@ import { useUserStore } from './store/user';
 
 const app = createApp(App);
 
-// 捕获 beforeinstallprompt 事件尽早注册，以防事件在组件挂载前触发导致丢失
-window.addEventListener('beforeinstallprompt', (e) => {
-	// 不在这里调用 preventDefault()，避免在页面没有及时调用 prompt() 时被浏览器报告
-	// 将事件保存到全局，组件在准备好展示并响应用户交互时负责调用 e.preventDefault() 和 e.prompt()
-	window.__deferredPWAInstallPrompt = e;
-});
+// 捕获 beforeinstallprompt 事件尽早注册，但在原生壳（Capacitor）/已安装环境不提示 PWA 安装
+const isNativeCapacitor = !!(window.Capacitor &&
+  (window.Capacitor.isNativePlatform?.() || ['android', 'ios'].includes(window.Capacitor.getPlatform?.())));
+const isStandaloneDisplay = window.matchMedia?.('(display-mode: standalone)').matches;
+
+if (!isNativeCapacitor && !isStandaloneDisplay) {
+	window.addEventListener('beforeinstallprompt', (e) => {
+		// 不在这里调用 preventDefault()，避免在页面没有及时调用 prompt() 时被浏览器报告
+		// 将事件保存到全局，组件在准备好展示并响应用户交互时负责调用 e.preventDefault() 和 e.prompt()
+		window.__deferredPWAInstallPrompt = e;
+	});
+}
 
 
 app.use(pinia);

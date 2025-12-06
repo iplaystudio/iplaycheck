@@ -11,11 +11,36 @@
       <div class="form-section">
         <div class="form-group">
           <label>
-            <svg viewBox="0 0 24 24" fill="none">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="2"/>
-              <polyline points="14 2 14 8 20 8" stroke="currentColor" stroke-width="2"/>
-              <line x1="16" y1="13" x2="8" y2="13" stroke="currentColor" stroke-width="2"/>
-              <line x1="16" y1="17" x2="8" y2="17" stroke="currentColor" stroke-width="2"/>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <path
+                d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+              <polyline
+                points="14 2 14 8 20 8"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+              <line
+                x1="16"
+                y1="13"
+                x2="8"
+                y2="13"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+              <line
+                x1="16"
+                y1="17"
+                x2="8"
+                y2="17"
+                stroke="currentColor"
+                stroke-width="2"
+              />
             </svg>
             文字内容
             <span class="optional">可选</span>
@@ -25,57 +50,143 @@
             placeholder="描述你的进度或工作内容..." 
             rows="5"
             class="text-input"
-          ></textarea>
-          <div class="char-count">{{ text.length }} 字</div>
+          />
+          <div class="char-count">
+            {{ text.length }} 字
+          </div>
         </div>
 
         <div class="form-group">
           <label>
-            <svg viewBox="0 0 24 24" fill="none">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
-              <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/>
-              <polyline points="21 15 16 10 5 21" stroke="currentColor" stroke-width="2"/>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <rect
+                x="3"
+                y="3"
+                width="18"
+                height="18"
+                rx="2"
+                ry="2"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+              <circle
+                cx="8.5"
+                cy="8.5"
+                r="1.5"
+                fill="currentColor"
+              />
+              <polyline
+                points="21 15 16 10 5 21"
+                stroke="currentColor"
+                stroke-width="2"
+              />
             </svg>
             图片附件
             <span class="optional">可选</span>
           </label>
           
-          <div v-if="!preview" class="upload-area" @click="triggerFileInput" @dragover.prevent @drop.prevent="onDrop">
+          <div
+            v-if="!preview"
+            class="upload-area"
+            @click="triggerFileInput"
+            @dragover.prevent
+            @drop.prevent="onDrop"
+          >
             <input 
               ref="fileInput"
               type="file" 
               accept="image/*" 
-              @change="onFileChange" 
-              class="file-input-hidden"
-            />
+              class="file-input-hidden" 
+              @change="onFileChange"
+            >
             <div class="upload-content">
-              <p class="upload-text">点击或拖拽图片到此处上传</p>
-              <p class="upload-hint">支持 JPG、PNG 等格式，最大 32MB</p>
+              <p class="upload-text">
+                点击或拖拽图片到此处上传
+              </p>
+              <p class="upload-hint">
+                支持 JPG、PNG 等格式，最大 32MB
+              </p>
             </div>
           </div>
 
-          <div v-else class="preview">
+          <div
+            v-else
+            class="preview"
+          >
             <div class="preview-image">
-              <img :src="preview" alt="preview" />
-              <button class="remove-btn" @click="clearImage">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                  <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <img
+                :src="preview"
+                alt="preview"
+              >
+              <button
+                class="remove-btn"
+                @click="clearImage"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                >
+                  <line
+                    x1="18"
+                    y1="6"
+                    x2="6"
+                    y2="18"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                  />
+                  <line
+                    x1="6"
+                    y1="6"
+                    x2="18"
+                    y2="18"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                  />
                 </svg>
               </button>
             </div>
-            <p class="preview-hint">点击右上角移除图片</p>
+            <p class="preview-hint">
+              点击右上角移除图片
+            </p>
           </div>
         </div>
       </div>
 
       <div class="actions">
-        <AppleButton variant="secondary" size="large" @click="clearAll">重置</AppleButton>
-        <AppleButton variant="primary" size="large" :loading="submitting" @click="submit">提交进度</AppleButton>
+        <AppleButton
+          variant="secondary"
+          size="large"
+          @click="clearAll"
+        >
+          重置
+        </AppleButton>
+        <AppleButton
+          variant="primary"
+          size="large"
+          :loading="submitting"
+          @click="submit"
+        >
+          提交进度
+        </AppleButton>
       </div>
 
-      <AppleToast :visible="!!error" type="error" :message="error" @update:visible="error = ''" />
-      <AppleToast :visible="success" type="success" message="提交成功！" @update:visible="success = false" />
+      <AppleToast
+        :visible="!!error"
+        type="error"
+        :message="error"
+        @update:visible="error = ''"
+      />
+      <AppleToast
+        :visible="success"
+        type="success"
+        message="提交成功！"
+        @update:visible="success = false"
+      />
     </AppleCard>
   </div>
 </template>

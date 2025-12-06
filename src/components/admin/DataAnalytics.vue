@@ -18,16 +18,47 @@
 
     <div class="analytics-controls">
       <div class="range-presets">
-        <button class="preset" type="button" @click.prevent="setPreset(7)">最近7天</button>
-        <button class="preset" type="button" @click.prevent="setPreset(14)">最近14天</button>
-        <button class="preset" type="button" @click.prevent="setPreset(30)">最近30天</button>
+        <button
+          class="preset"
+          type="button"
+          @click.prevent="setPreset(7)"
+        >
+          最近7天
+        </button>
+        <button
+          class="preset"
+          type="button"
+          @click.prevent="setPreset(14)"
+        >
+          最近14天
+        </button>
+        <button
+          class="preset"
+          type="button"
+          @click.prevent="setPreset(30)"
+        >
+          最近30天
+        </button>
       </div>
       <div class="range-picker">
         <label>起始日期</label>
-        <input type="date" v-model="startDate">
+        <input
+          v-model="startDate"
+          type="date"
+        >
         <label>结束日期</label>
-        <input type="date" v-model="endDate">
-        <button class="apply-range" type="button" @click.prevent="loadAnalytics" :disabled="loading">应用</button>
+        <input
+          v-model="endDate"
+          type="date"
+        >
+        <button
+          class="apply-range"
+          type="button"
+          :disabled="loading"
+          @click.prevent="loadAnalytics"
+        >
+          应用
+        </button>
       </div>
     </div>
     <div class="analytics-grid">

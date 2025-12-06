@@ -70,7 +70,9 @@
           hoverable
         >
           <div class="card-header">
-            <div class="card-name">{{ user.name }}</div>
+            <div class="card-name">
+              {{ user.name }}
+            </div>
             <span
               class="role-badge"
               :class="`role-${user.role}`"
@@ -80,9 +82,15 @@
           </div>
           <div class="card-content">
             <div class="card-info">
-              <div class="card-email">{{ user.email }}</div>
-              <div class="card-id">ID: {{ user.id }}</div>
-              <div class="card-date">创建时间: {{ formatDate(user.created_at) }}</div>
+              <div class="card-email">
+                {{ user.email }}
+              </div>
+              <div class="card-id">
+                ID: {{ user.id }}
+              </div>
+              <div class="card-date">
+                创建时间: {{ formatDate(user.created_at) }}
+              </div>
             </div>
             <div class="card-actions">
               <AppleButton

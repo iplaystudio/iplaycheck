@@ -28,6 +28,10 @@ supabase
 .env
 .env.local
 .env.*.local
+android/
+restarhalf-release-key.jks
+capacitor.config.ts
+capacitor.config.json
 
 # Miscellaneous
 *.bak

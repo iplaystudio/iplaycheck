@@ -28,8 +28,8 @@
           <button
             class="btn-primary"
             :disabled="!deferredPrompt"
-            @click="install"
             :title="!deferredPrompt ? '当前无法安装，请刷新页面或检查浏览器支持' : ''"
+            @click="install"
           >
             安装
           </button>
@@ -44,6 +44,16 @@ import { ref, onMounted, onUnmounted } from 'vue';
 
 const showPrompt = ref(false);
 const deferredPrompt = ref(null);
+
+// 检测是否在 Capacitor 原生环境或已安装为 PWA
+const isNativeCapacitor = !!(window.Capacitor &&
+  (window.Capacitor.isNativePlatform?.() || ['android', 'ios'].includes(window.Capacitor.getPlatform?.())));
+const isStandaloneDisplay = window.matchMedia?.('(display-mode: standalone)').matches;
+
+// 如果在原生应用或已安装，直接不显示任何提示
+if (isNativeCapacitor || isStandaloneDisplay) {
+  showPrompt.value = false;
+}
 
 const syncDeferredPrompt = () => {
   if (window.__deferredPWAInstallPrompt && deferredPrompt.value !== window.__deferredPWAInstallPrompt) {
@@ -77,6 +87,8 @@ const dismiss = () => {
 };
 
 const showInstallPrompt = () => {
+  // 在 Capacitor 原生环境或已安装时不显示
+  if (isNativeCapacitor || isStandaloneDisplay) return;
   if (window.matchMedia('(display-mode: standalone)').matches) return;
   if (import.meta.env.DEV) {
     showPrompt.value = true;
@@ -88,6 +100,9 @@ const showInstallPrompt = () => {
 };
 
 onMounted(() => {
+  // 在原生应用或已安装时跳过所有逻辑
+  if (isNativeCapacitor || isStandaloneDisplay) return;
+  
   syncDeferredPrompt();
   setTimeout(() => {
     showInstallPrompt();
