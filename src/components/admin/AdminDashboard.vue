@@ -6,7 +6,7 @@
         <AppleButton
           variant="danger"
           size="medium"
-          fullWidth
+          full-width
           @click="showClearConfirm = true"
         >
           清空记录
@@ -16,7 +16,7 @@
           size="medium"
           :disabled="loading"
           :loading="loading"
-          fullWidth
+          full-width
           @click="refreshData"
         >
           刷新

@@ -246,12 +246,14 @@ export default {
 <style scoped>
 .camera-capture {
   padding: 24px;
+  padding-bottom: calc(24px + env(safe-area-inset-bottom));
 }
 
 .camera-container {
   position: relative;
   width: 100%;
   aspect-ratio: 4 / 3;
+  max-height: min(70vh, 80vw * 1.33);
   background: var(--systemFill);
   border-radius: var(--global-border-radius-large);
   overflow: hidden;
@@ -349,10 +351,27 @@ export default {
 @media (max-width: 480px) {
   .camera-capture {
     padding: 16px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
   }
 
   .camera-controls > * {
     min-width: 120px;
+  }
+
+  .camera-controls {
+    flex-direction: column;
+  }
+
+  .camera-container {
+    aspect-ratio: auto;
+    height: min(65vh, 100vw * 1.33);
+    max-height: 70vh;
+  }
+
+  .camera-video,
+  .camera-canvas,
+  .photo-preview img {
+    object-fit: cover;
   }
 }
 </style>

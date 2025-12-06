@@ -3,20 +3,32 @@
     <AppleCard class="announcements-card">
       <div class="announcements-header">
         <h3>公告</h3>
-        <div v-if="announcementsStore.loading" class="loading">
+        <div
+          v-if="announcementsStore.loading"
+          class="loading"
+        >
           <AppleLoading size="small" />
         </div>
       </div>
 
-      <div v-if="announcementsStore.error" class="error-message">
+      <div
+        v-if="announcementsStore.error"
+        class="error-message"
+      >
         {{ announcementsStore.error }}
       </div>
 
-      <div v-else-if="announcementsStore.announcements.length === 0" class="no-announcements">
+      <div
+        v-else-if="announcementsStore.announcements.length === 0"
+        class="no-announcements"
+      >
         暂无公告
       </div>
 
-      <div v-else class="announcements-list">
+      <div
+        v-else
+        class="announcements-list"
+      >
         <div
           v-for="announcement in announcementsStore.announcements.slice(0, showAll ? undefined : 3)"
           :key="announcement.id"
@@ -32,15 +44,28 @@
           <div class="announcement-content">
             {{ truncateContent(announcement.content) }}
           </div>
-          <div v-if="announcement.content.length > 100" class="read-more">
-            <button @click="toggleExpanded(announcement.id)" class="read-more-btn">
+          <div
+            v-if="announcement.content.length > 100"
+            class="read-more"
+          >
+            <button
+              class="read-more-btn"
+              @click="toggleExpanded(announcement.id)"
+            >
               {{ expandedAnnouncements.includes(announcement.id) ? '收起' : '展开' }}
             </button>
           </div>
         </div>
 
-        <div v-if="announcementsStore.announcements.length > 3 && !showAll" class="show-more">
-          <AppleButton @click="showAll = true" variant="secondary" size="small">
+        <div
+          v-if="announcementsStore.announcements.length > 3 && !showAll"
+          class="show-more"
+        >
+          <AppleButton
+            variant="secondary"
+            size="small"
+            @click="showAll = true"
+          >
             查看更多公告
           </AppleButton>
         </div>
@@ -74,13 +99,8 @@ export default {
     }
   },
   mounted() {
-    // 加载公告并订阅更新
-    this.announcementsStore.loadAnnouncements();
-    this.announcementsStore.subscribeToUpdates();
-  },
-  beforeUnmount() {
-    // 取消订阅
-    this.announcementsStore.unsubscribe();
+    // 加载公告并订阅更新（带初始化防抖）
+    this.announcementsStore.init();
   },
   methods: {
     formatDate(dateString) {

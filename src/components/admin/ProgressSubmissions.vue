@@ -4,32 +4,90 @@
       <h2>提交进度列表</h2>
       <div class="controls">
         <div class="search-box">
-          <svg class="search-icon" viewBox="0 0 24 24" fill="none">
-            <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/>
-            <path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <svg
+            class="search-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+          >
+            <circle
+              cx="11"
+              cy="11"
+              r="8"
+              stroke="currentColor"
+              stroke-width="2"
+            />
+            <path
+              d="m21 21-4.35-4.35"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
           </svg>
-          <input v-model="search" placeholder="搜索用户或内容" class="search-input" />
+          <input
+            v-model="search"
+            placeholder="搜索用户或内容"
+            class="search-input"
+          >
         </div>
-        <input v-model="filterDate" type="date" class="date-input" />
-        <button class="refresh-btn" @click="loadSubmissions">
-          <svg viewBox="0 0 24 24" fill="none">
-            <path d="M23 4v6h-6M1 20v-6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <input
+          v-model="filterDate"
+          type="date"
+          class="date-input"
+        >
+        <button
+          class="refresh-btn"
+          @click="loadSubmissions"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+          >
+            <path
+              d="M23 4v6h-6M1 20v-6h6"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
           </svg>
           刷新
         </button>
       </div>
     </div>
 
-    <div v-if="filtered.length === 0" class="empty-state">
-      <svg viewBox="0 0 24 24" fill="none">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="2"/>
-        <polyline points="14 2 14 8 20 8" stroke="currentColor" stroke-width="2"/>
+    <div
+      v-if="filtered.length === 0"
+      class="empty-state"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+      >
+        <path
+          d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+          stroke="currentColor"
+          stroke-width="2"
+        />
+        <polyline
+          points="14 2 14 8 20 8"
+          stroke="currentColor"
+          stroke-width="2"
+        />
       </svg>
       <p>暂无提交记录</p>
     </div>
 
-    <div v-else class="list">
+    <div
+      v-else
+      class="list"
+    >
       <AppleCard 
         v-for="item in filtered" 
         :key="item.id" 
@@ -40,29 +98,80 @@
         <div class="card-content">
           <div class="card-left">
             <div class="avatar">
-              <svg viewBox="0 0 24 24" fill="none">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2"/>
-                <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+              >
+                <path
+                  d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+                  stroke="currentColor"
+                  stroke-width="2"
+                />
+                <circle
+                  cx="12"
+                  cy="7"
+                  r="4"
+                  stroke="currentColor"
+                  stroke-width="2"
+                />
               </svg>
             </div>
             <div class="meta">
-              <div class="user">{{ getUserName(item.user_id) }}</div>
-              <div class="time">{{ formatDate(item.created_at) }}</div>
+              <div class="user">
+                {{ getUserName(item.user_id) }}
+              </div>
+              <div class="time">
+                {{ formatDate(item.created_at) }}
+              </div>
             </div>
           </div>
           <div class="card-right">
             <div class="content-preview">
-              <span v-if="item.image_url" class="has-image-badge">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
-                  <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/>
-                  <polyline points="21 15 16 10 5 21" stroke="currentColor" stroke-width="2"/>
+              <span
+                v-if="resolveImageUrl(item)"
+                class="has-image-badge"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                >
+                  <rect
+                    x="3"
+                    y="3"
+                    width="18"
+                    height="18"
+                    rx="2"
+                    ry="2"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  />
+                  <circle
+                    cx="8.5"
+                    cy="8.5"
+                    r="1.5"
+                    fill="currentColor"
+                  />
+                  <polyline
+                    points="21 15 16 10 5 21"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  />
                 </svg>
               </span>
-              {{ item.content ? item.content.slice(0,80) + (item.content.length > 80 ? '...' : '') : (item.image_url ? '图片提交' : '-') }}
+              {{ item.content ? item.content.slice(0,80) + (item.content.length > 80 ? '...' : '') : (resolveImageUrl(item) ? '图片提交' : '-') }}
             </div>
-            <svg class="arrow-icon" viewBox="0 0 24 24" fill="none">
-              <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg
+              class="arrow-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <path
+                d="M9 18l6-6-6-6"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </div>
         </div>
@@ -71,14 +180,43 @@
 
     <Teleport to="body">
       <Transition name="modal">
-        <div v-if="showDetail" class="modal-overlay" @click="showDetail = false">
-          <div class="modal-card" @click.stop>
+        <div
+          v-if="showDetail"
+          class="modal-overlay"
+          @click="showDetail = false"
+        >
+          <div
+            class="modal-card"
+            @click.stop
+          >
             <div class="modal-header">
               <h3>提交详情</h3>
-              <button class="close-btn" @click="showDetail = false">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                  <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <button
+                class="close-btn"
+                @click="showDetail = false"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                >
+                  <line
+                    x1="18"
+                    y1="6"
+                    x2="6"
+                    y2="18"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                  />
+                  <line
+                    x1="6"
+                    y1="6"
+                    x2="18"
+                    y2="18"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                  />
                 </svg>
               </button>
             </div>
@@ -95,16 +233,25 @@
                   </div>
                 </div>
               </div>
-              <div v-if="detail.content" class="detail-section">
+              <div
+                v-if="detail.content"
+                class="detail-section"
+              >
                 <h4>文字内容</h4>
                 <div class="detail-text-content">
                   <p>{{ detail.content }}</p>
                 </div>
               </div>
-              <div v-if="detail.image_url" class="detail-section">
+              <div
+                v-if="resolveImageUrl(detail)"
+                class="detail-section"
+              >
                 <h4>图片附件</h4>
                 <div class="detail-image">
-                  <img :src="detail.image_url" alt="提交图片" />
+                  <img
+                    :src="resolveImageUrl(detail)"
+                    alt="提交图片"
+                  >
                 </div>
               </div>
             </div>
@@ -131,6 +278,30 @@ export default {
     const filterDate = ref('');
     const showDetail = ref(false);
     const detail = ref({});
+
+    const resolveImageUrl = (record) => {
+      if (!record) return '';
+      const candidates = [
+        record.image_url,
+        record.imageUrl,
+        record.photo_url,
+        record.photo,
+        record.image,
+        record.photoBase64,
+        record.attachment
+      ];
+
+      for (const raw of candidates) {
+        if (!raw) continue;
+        const val = String(raw);
+        if (val.startsWith('http://') || val.startsWith('https://') || val.startsWith('data:')) {
+          return val;
+        }
+        // Base64 裸数据兜底
+        return `data:image/jpeg;base64,${val}`;
+      }
+      return '';
+    };
 
     const loadUsers = async () => {
       try {
@@ -189,7 +360,8 @@ export default {
       getUserName,
       formatDate,
       filtered,
-      openDetail
+        openDetail,
+        resolveImageUrl
     };
   }
 };

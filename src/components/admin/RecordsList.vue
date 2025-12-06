@@ -111,7 +111,9 @@
           @click="viewDetails(record)"
         >
           <div class="card-header">
-            <div class="card-time">{{ formatDateTime(record.timestamp) }}</div>
+            <div class="card-time">
+              {{ formatDateTime(record.timestamp) }}
+            </div>
             <div class="card-actions">
               <span
                 class="type-badge"

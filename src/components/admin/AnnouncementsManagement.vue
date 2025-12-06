@@ -11,12 +11,23 @@
       </AppleButton>
     </div>
 
-    <div v-if="loading" class="loading-state">
-      <AppleLoading size="large" text="加载公告中..." />
+    <div
+      v-if="loading"
+      class="loading-state"
+    >
+      <AppleLoading
+        size="large"
+        text="加载公告中..."
+      />
     </div>
 
-    <div v-else-if="announcements.length === 0" class="empty-state">
-      <div class="empty-icon">📢</div>
+    <div
+      v-else-if="announcements.length === 0"
+      class="empty-state"
+    >
+      <div class="empty-icon">
+        📢
+      </div>
       <p>暂无公告</p>
       <AppleButton
         variant="secondary"
@@ -26,7 +37,10 @@
       </AppleButton>
     </div>
 
-    <div v-else class="announcements-list">
+    <div
+      v-else
+      class="announcements-list"
+    >
       <div
         v-for="announcement in announcements"
         :key="announcement.id"
@@ -37,10 +51,16 @@
             <h4>{{ announcement.title }}</h4>
             <div class="announcement-meta">
               <span class="date">{{ formatDate(announcement.created_at) }}</span>
-              <span class="status" :class="{ active: announcement.is_active }">
+              <span
+                class="status"
+                :class="{ active: announcement.is_active }"
+              >
                 {{ announcement.is_active ? '已发布' : '已隐藏' }}
               </span>
-              <span class="priority" v-if="announcement.priority > 0">
+              <span
+                v-if="announcement.priority > 0"
+                class="priority"
+              >
                 优先级: {{ announcement.priority }}
               </span>
             </div>
@@ -126,10 +146,19 @@
 
               <div class="form-group">
                 <label for="priority">优先级</label>
-                <select id="priority" v-model.number="form.priority">
-                  <option :value="0">普通</option>
-                  <option :value="1">重要</option>
-                  <option :value="2">紧急</option>
+                <select
+                  id="priority"
+                  v-model.number="form.priority"
+                >
+                  <option :value="0">
+                    普通
+                  </option>
+                  <option :value="1">
+                    重要
+                  </option>
+                  <option :value="2">
+                    紧急
+                  </option>
                 </select>
               </div>
 
@@ -186,7 +215,9 @@
           </div>
           <div class="modal-body">
             <p>确定要删除公告 <strong>{{ deletingAnnouncement?.title }}</strong> 吗？</p>
-            <p class="warning-text">此操作不可恢复！</p>
+            <p class="warning-text">
+              此操作不可恢复！
+            </p>
           </div>
           <div class="modal-actions">
             <AppleButton

@@ -212,8 +212,10 @@
 </template>
 
 <script>
-import { computed, ref } from 'vue';
+import { computed, onMounted, onUnmounted } from 'vue';
+import { App as CapacitorApp } from '@capacitor/app';
 import { useUserStore } from '@/store/user';
+import { useAnnouncementsStore } from '@/store/announcements';
 import syncService from '@/services/sync';
 import PWAInstallPrompt from '@/components/shared/PWAInstallPrompt.vue';
 
@@ -226,9 +228,11 @@ export default {
 
   setup() {
     const userStore = useUserStore();
+    const announcementsStore = useAnnouncementsStore();
+    let appStateListener;
 
-  const isAuthenticated = computed(() => userStore.isAuthenticated);
-  const isAdmin = computed(() => userStore.isAdmin);
+    const isAuthenticated = computed(() => userStore.isAuthenticated);
+    const isAdmin = computed(() => userStore.isAdmin);
 
     // 初始化应用
     const initApp = async () => {
@@ -239,12 +243,36 @@ export default {
       if (userStore.isAuthenticated) {
         syncService.startAutoSync(60000); // 每分钟同步一次
       }
+
+      // 初始化公告订阅与权限
+      await announcementsStore.init();
     };
 
-    // 页面加载时初始化
-    if (typeof window !== 'undefined') {
-      initApp();
-    }
+    const attachAppStateListener = () => {
+      try {
+        appStateListener = CapacitorApp.addListener('appStateChange', ({ isActive }) => {
+          if (isActive) {
+            // 重新进入前台时刷新公告并尝试提醒
+            announcementsStore.loadAnnouncements();
+          }
+        });
+      } catch {
+        // ignore
+      }
+    };
+
+    onMounted(() => {
+      if (typeof window !== 'undefined') {
+        initApp();
+        attachAppStateListener();
+      }
+    });
+
+    onUnmounted(() => {
+      if (appStateListener && typeof appStateListener.remove === 'function') {
+        appStateListener.remove();
+      }
+    });
 
     return {
       isAuthenticated,
@@ -280,6 +308,9 @@ export default {
   z-index: var(--z-web-chrome);
   border-bottom: 0.5px solid var(--defaultLine);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  /* 避开系统状态栏刘海区域 */
+  padding-top: env(safe-area-inset-top);
+  padding-top: constant(safe-area-inset-top);
 }
 
 .nav-container {
