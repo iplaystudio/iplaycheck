@@ -960,7 +960,16 @@ onUnmounted(() => {
 }
 
 .modal-card.camera-modal {
-  max-width: 640px;
+  max-width: 520px;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal-card.camera-modal :deep(.camera-capture) {
+  max-height: calc(92vh - 72px);
+  overflow-y: auto;
 }
 
 @keyframes slideUp {
@@ -1022,6 +1031,17 @@ onUnmounted(() => {
 @media (max-width: 480px) {
   .punch-clock {
     padding: 16px;
+  }
+
+  .modal-card.camera-modal {
+    width: 100%;
+    max-width: 100%;
+    max-height: 90vh;
+    margin: 0 8px;
+  }
+
+  .modal-card.camera-modal :deep(.camera-capture) {
+    max-height: calc(90vh - 64px);
   }
 
   .current-time {
