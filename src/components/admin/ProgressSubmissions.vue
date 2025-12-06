@@ -93,6 +93,7 @@
         :key="item.id" 
         class="submission-card" 
         hoverable 
+        clickable
         @click="openDetail(item)"
       >
         <div class="card-content">
