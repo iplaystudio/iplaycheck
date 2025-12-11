@@ -11,12 +11,11 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix"
   },
   "dependencies": {
-    "@capacitor/android": "^7.4.4",
-    "@capacitor/app": "^7.1.0",
-    "@capacitor/cli": "^7.4.4",
-    "@capacitor/core": "^7.4.4",
-    "@capacitor/local-notifications": "^7.0.0",
-    "@capacitor/preferences": "^7.0.2",
+    "@capacitor/android": "^8.0.0",
+    "@capacitor/app": "^8.0.0",
+    "@capacitor/core": "^8.0.0",
+    "@capacitor/local-notifications": "^8.0.0",
+    "@capacitor/preferences": "^8.0.0",
     "@supabase/supabase-js": "^2.80.0",
     "axios": "^1.5.0",
     "idb": "^7.1.1",
@@ -26,10 +25,13 @@
     "vue-router": "^4.2.4"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.0.0",
+    "@tauri-apps/cli": "^2.9.6",
     "@vitejs/plugin-vue": "^4.4.0",
     "@vue/eslint-config-prettier": "^10.2.0",
     "eslint": "^9.39.1",
     "eslint-plugin-vue": "^10.5.1",
+    "install": "^0.13.0",
     "typescript": "^5.9.3",
     "vite": "^4.5.0",
     "vite-plugin-pwa": "^0.17.0",

@@ -45,13 +45,14 @@ import { ref, onMounted, onUnmounted } from 'vue';
 const showPrompt = ref(false);
 const deferredPrompt = ref(null);
 
-// 检测是否在 Capacitor 原生环境或已安装为 PWA
+// 检测是否在 Capacitor 原生环境、Tauri 或已安装为 PWA
 const isNativeCapacitor = !!(window.Capacitor &&
   (window.Capacitor.isNativePlatform?.() || ['android', 'ios'].includes(window.Capacitor.getPlatform?.())));
+const isTauri = !!window.__TAURI_INTERNALS__;
 const isStandaloneDisplay = window.matchMedia?.('(display-mode: standalone)').matches;
 
-// 如果在原生应用或已安装，直接不显示任何提示
-if (isNativeCapacitor || isStandaloneDisplay) {
+// 如果在原生应用、Tauri 或已安装，直接不显示任何提示
+if (isNativeCapacitor || isTauri || isStandaloneDisplay) {
   showPrompt.value = false;
 }
 
@@ -87,8 +88,8 @@ const dismiss = () => {
 };
 
 const showInstallPrompt = () => {
-  // 在 Capacitor 原生环境或已安装时不显示
-  if (isNativeCapacitor || isStandaloneDisplay) return;
+  // 在 Capacitor 原生环境、Tauri 或已安装时不显示
+  if (isNativeCapacitor || isTauri || isStandaloneDisplay) return;
   if (window.matchMedia('(display-mode: standalone)').matches) return;
   if (import.meta.env.DEV) {
     showPrompt.value = true;
@@ -100,8 +101,8 @@ const showInstallPrompt = () => {
 };
 
 onMounted(() => {
-  // 在原生应用或已安装时跳过所有逻辑
-  if (isNativeCapacitor || isStandaloneDisplay) return;
+  // 在原生应用、Tauri 或已安装时跳过所有逻辑
+  if (isNativeCapacitor || isTauri || isStandaloneDisplay) return;
   
   syncDeferredPrompt();
   setTimeout(() => {

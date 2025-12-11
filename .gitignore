@@ -19,6 +19,7 @@ Thumbs.db
 # Build output
 dist/
 public/
+ios/
 
 # Service Worker
 firebase-messaging-sw.js
@@ -32,6 +33,8 @@ android/
 restarhalf-release-key.jks
 capacitor.config.ts
 capacitor.config.json
+dev-dist/
+src-tauri/
 
 # Miscellaneous
 *.bak

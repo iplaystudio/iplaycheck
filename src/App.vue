@@ -236,16 +236,21 @@ export default {
 
     // 初始化应用
     const initApp = async () => {
-      // 初始化认证
-      await userStore.initAuth();
+      try {
+        // 初始化认证
+        await userStore.initAuth();
 
-      // 启动自动同步
-      if (userStore.isAuthenticated) {
-        syncService.startAutoSync(60000); // 每分钟同步一次
+        // 启动自动同步
+        if (userStore.isAuthenticated) {
+          syncService.startAutoSync(60000); // 每分钟同步一次
+        }
+
+        // 初始化公告订阅与权限
+        await announcementsStore.init();
+      } catch (error) {
+        console.error('应用初始化失败:', error);
+        // 即使初始化失败，也要确保应用能显示登录页
       }
-
-      // 初始化公告订阅与权限
-      await announcementsStore.init();
     };
 
     const attachAppStateListener = () => {
